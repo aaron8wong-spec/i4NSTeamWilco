@@ -1,0 +1,15 @@
+root ::= cmd-goto | cmd-search-area | cmd-loiter | cmd-hold | cmd-return-home | cmd-clarify
+lat ::= num
+lon ::= num
+alt-m ::= num
+cmd-goto ::= "{" ws "\"action\"" ws ":" ws "\"goto\"" ws "," ws "\"params\"" ws ":" ws "{" ws "\"lat\"" ws ":" ws lat ws "," ws "\"lon\"" ws ":" ws lon ws "," ws "\"alt_m\"" ws ":" ws alt-m ws "}" ws "}"
+point ::= "{" ws "\"lat\"" ws ":" ws lat ws "," ws "\"lon\"" ws ":" ws lon ws "}"
+radius-m ::= num
+cmd-search-area ::= "{" ws "\"action\"" ws ":" ws "\"search_area\"" ws "," ws "\"params\"" ws ":" ws "{" ws "\"center\"" ws ":" ws point ws "," ws "\"radius_m\"" ws ":" ws radius-m ws "," ws "\"alt_m\"" ws ":" ws alt-m ws "," ws "\"target\"" ws ":" ws ("\"vehicle\"" | "\"person\"" | "\"wildlife\"" | "\"structure\"" | "\"unknown\"") ws "}" ws "}"
+cmd-loiter ::= "{" ws "\"action\"" ws ":" ws "\"loiter\"" ws "," ws "\"params\"" ws ":" ws "{" ws "\"center\"" ws ":" ws point ws "," ws "\"radius_m\"" ws ":" ws radius-m ws "," ws "\"duration_s\"" ws ":" ws num ws "," ws "\"alt_m\"" ws ":" ws alt-m ws "}" ws "}"
+cmd-hold ::= "{" ws "\"action\"" ws ":" ws "\"hold\"" ws "," ws "\"params\"" ws ":" ws "{" ws "}" ws "}"
+cmd-return-home ::= "{" ws "\"action\"" ws ":" ws "\"return_home\"" ws "," ws "\"params\"" ws ":" ws "{" ws "}" ws "}"
+cmd-clarify ::= "{" ws "\"action\"" ws ":" ws "\"clarify\"" ws "," ws "\"params\"" ws ":" ws "{" ws "\"question\"" ws ":" ws "\"" strchar{1,200} "\"" ws "}" ws "}"
+ws ::= [ \t\n]{0,2}
+num ::= "-"? [0-9]+ ("." [0-9]+)?
+strchar ::= [^"\\\x00-\x1f] | "\\" ["\\/bfnrt]

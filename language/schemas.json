@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "LOCAL PLACEHOLDER (R2). Copies CLAUDE.md section 5 (DRAFT). Replace with R5's frozen schemas.json (task 5.2) when it lands. Shape only: limits such as geofence and max altitude belong to the safety gate (section 7), not here.",
+  "title": "Command",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "action": {"const": "goto"},
+        "params": {
+          "type": "object",
+          "properties": {
+            "lat": {"$ref": "#/$defs/lat"},
+            "lon": {"$ref": "#/$defs/lon"},
+            "alt_m": {"$ref": "#/$defs/alt_m"}
+          },
+          "required": ["lat", "lon", "alt_m"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["action", "params"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "action": {"const": "search_area"},
+        "params": {
+          "type": "object",
+          "properties": {
+            "center": {"$ref": "#/$defs/point"},
+            "radius_m": {"$ref": "#/$defs/radius_m"},
+            "alt_m": {"$ref": "#/$defs/alt_m"},
+            "target": {"enum": ["vehicle", "person", "wildlife", "structure", "unknown"]}
+          },
+          "required": ["center", "radius_m", "alt_m", "target"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["action", "params"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "action": {"const": "loiter"},
+        "params": {
+          "type": "object",
+          "properties": {
+            "center": {"$ref": "#/$defs/point"},
+            "radius_m": {"$ref": "#/$defs/radius_m"},
+            "duration_s": {"type": "number", "exclusiveMinimum": 0},
+            "alt_m": {"$ref": "#/$defs/alt_m"}
+          },
+          "required": ["center", "radius_m", "duration_s", "alt_m"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["action", "params"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "action": {"const": "hold"},
+        "params": {"type": "object", "properties": {}, "additionalProperties": false}
+      },
+      "required": ["action", "params"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "action": {"const": "return_home"},
+        "params": {"type": "object", "properties": {}, "additionalProperties": false}
+      },
+      "required": ["action", "params"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "action": {"const": "clarify"},
+        "params": {
+          "type": "object",
+          "properties": {
+            "question": {"type": "string", "minLength": 1, "maxLength": 200}
+          },
+          "required": ["question"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["action", "params"],
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "lat": {"type": "number", "minimum": -90, "maximum": 90},
+    "lon": {"type": "number", "minimum": -180, "maximum": 180},
+    "alt_m": {"type": "number", "minimum": 0},
+    "radius_m": {"type": "number", "exclusiveMinimum": 0},
+    "point": {
+      "type": "object",
+      "properties": {
+        "lat": {"$ref": "#/$defs/lat"},
+        "lon": {"$ref": "#/$defs/lon"}
+      },
+      "required": ["lat", "lon"],
+      "additionalProperties": false
+    }
+  }
+}
