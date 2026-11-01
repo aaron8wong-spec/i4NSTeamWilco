@@ -5,4 +5,6 @@
 
 Run the tests: `cd language && python3 -m pytest -q` (needs `pytest` and `jsonschema`). The 40 grammar-acceptance tests are skipped unless llama.cpp's `llama-gbnf-validator` is on PATH.
 
-Run the model: `llama-server -m ~/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf --port 8080 -c 4096 --device none`. `--device none` is needed on the M2 because the Metal shader build fails in llama.cpp 0.8.0 on this macOS. Latency numbers in the CSV were taken under heavy memory swapping on a 16 GB laptop, so treat them as a worst case.
+Run the model: `GGML_METAL_BF16_DISABLE=1 llama-server -m ~/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf --port 8080 -c 4096`.
+
+Metal note (M2, macOS 15.6, llama.cpp 0.8.0 from brew): without the variable, the Metal shader build fails (`constexpr` error in the `unary` kernel) and the server cannot start on the GPU. Setting `GGML_METAL_BF16_DISABLE=1` lets it start with no Metal errors, and a short `hold` request ran at about 34 tokens/s generation, against about 4 on CPU (`--device none`). We did not find out why the fix works, and the server log has no Metal lines, so GPU use is inferred from speed. Over the 40 seeds the median latency stayed about 6 s (CPU 6.4 s, GPU 6.0 s). The laptop was swapping heavily (16 GB), so treat all latency numbers as a worst case.
