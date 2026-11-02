@@ -1,0 +1,21 @@
+[
+  {"id": "R01", "applies_to": "vehicle", "condition": "people_visible >= 1 and people_visible <= 2 and confidence >= 0.6", "priority": "high", "min_confidence": 0.6, "safety_relevant": false, "action": "interrupt", "reason": "Person inside a vehicle. Recommend a closer look."},
+  {"id": "R02", "applies_to": "vehicle", "condition": "people_visible >= 1 and confidence < 0.6", "priority": "high", "min_confidence": 0.0, "safety_relevant": false, "action": "ask", "reason": "Possible person inside a vehicle, but I'm not sure. Want me to check?"},
+  {"id": "R03", "applies_to": "vehicle", "condition": "people_visible == 0", "priority": "medium", "min_confidence": 0.0, "safety_relevant": false, "action": "summarize", "reason": "Empty vehicle. Added to the search report."},
+  {"id": "R04", "applies_to": "vehicle", "condition": "people_visible >= 3 and confidence >= 0.6", "priority": "high", "min_confidence": 0.6, "safety_relevant": true, "action": "interrupt", "reason": "Vehicle with three or more people. Reported for squad safety."},
+
+  {"id": "R05", "applies_to": "person", "condition": "people_visible <= 2 and confidence >= 0.7", "priority": "high", "min_confidence": 0.7, "safety_relevant": false, "action": "interrupt", "reason": "Person in the search area."},
+  {"id": "R06", "applies_to": "person", "condition": "people_visible <= 2 and confidence >= 0.3 and confidence < 0.7", "priority": "high", "min_confidence": 0.0, "safety_relevant": false, "action": "ask", "reason": "Possible person, but I'm not sure. Want me to check?"},
+  {"id": "R07", "applies_to": "person", "condition": "people_visible >= 3 and confidence >= 0.3", "priority": "high", "min_confidence": 0.3, "safety_relevant": true, "action": "interrupt", "reason": "Group of three or more people. Reported for squad safety."},
+  {"id": "R08", "applies_to": "person", "condition": "confidence < 0.3", "priority": "low", "min_confidence": 0.0, "safety_relevant": false, "action": "log", "reason": "Very low-confidence person detection. Logged only."},
+
+  {"id": "R09", "applies_to": "structure", "condition": "people_visible == 0", "priority": "medium", "min_confidence": 0.0, "safety_relevant": false, "action": "summarize", "reason": "Building in the search area. Added to the search report."},
+  {"id": "R10", "applies_to": "structure", "condition": "people_visible >= 1 and confidence >= 0.6", "priority": "high", "min_confidence": 0.6, "safety_relevant": false, "action": "interrupt", "reason": "People at a building. Recommend a closer look."},
+  {"id": "R11", "applies_to": "structure", "condition": "people_visible >= 1 and confidence < 0.6", "priority": "high", "min_confidence": 0.0, "safety_relevant": false, "action": "ask", "reason": "Possible people at a building, but I'm not sure. Want me to check?"},
+
+  {"id": "R12", "applies_to": "unknown", "condition": "people_visible == 0 and confidence >= 0.3", "priority": "high", "min_confidence": 0.0, "safety_relevant": true, "action": "ask", "reason": "Unidentified object. Want me to take a closer look?"},
+  {"id": "R13", "applies_to": "unknown", "condition": "people_visible >= 1 and confidence >= 0.3", "priority": "high", "min_confidence": 0.3, "safety_relevant": true, "action": "interrupt", "reason": "Unidentified object with people nearby. Recommend a closer look."},
+  {"id": "R14", "applies_to": "unknown", "condition": "confidence < 0.3", "priority": "low", "min_confidence": 0.0, "safety_relevant": false, "action": "log", "reason": "Very low-confidence unidentified object. Logged only."},
+
+  {"id": "R15", "applies_to": "wildlife", "condition": null, "priority": "low", "min_confidence": 0.0, "safety_relevant": false, "action": "log", "reason": "Wildlife is not a mission target."}
+]
