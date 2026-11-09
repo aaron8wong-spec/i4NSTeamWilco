@@ -1,0 +1,433 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "i4NS Army-737 MVP schemas",
+  "description": "Shared data contracts for the Say Less, Fly More MVP. Command is what the language model emits. Event is what the simulated drone reports. MissionState is the shared mission memory. Rule is one entry in rules.json. OperatorMessage is what the operator hears or sees. Units: metres, seconds, degrees (WGS84). Altitude is metres above the home point. See schemas.md.",
+  "x-schema-version": "1.0.0",
+  "$defs": {
+    "Lat": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90,
+      "description": "Latitude in degrees, WGS84."
+    },
+    "Lon": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180,
+      "description": "Longitude in degrees, WGS84."
+    },
+    "AltM": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Altitude in whole metres above the home point. The range is wide on purpose so the safety gate, not the grammar, decides what is too high and can tell the operator why."
+    },
+    "RadiusM": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 5000,
+      "description": "Radius in whole metres."
+    },
+    "DurationS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600,
+      "description": "Duration in whole seconds."
+    },
+    "Place": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,31}$",
+      "description": "Snake_case name from the places table, for example north_field. Code resolves it to lat/lon. A name that is not in the table is refused with a reason."
+    },
+    "EventId": {
+      "type": "string",
+      "pattern": "^E[0-9]{2,4}$",
+      "description": "Event id such as E03."
+    },
+    "RuleId": {
+      "type": "string",
+      "pattern": "^R[0-9]{2,3}$",
+      "description": "Rule id such as R03."
+    },
+    "EventType": {
+      "type": "string",
+      "enum": ["vehicle", "person", "structure", "wildlife", "unknown"],
+      "description": "What the simulated detector says it saw. unknown covers the case where something is seen but not identified."
+    },
+    "TargetType": {
+      "type": "string",
+      "enum": ["vehicle", "person", "structure", "any"],
+      "description": "What a search_area command is looking for."
+    },
+    "Tier": {
+      "type": "string",
+      "enum": ["interrupt", "summarize", "log", "ask"],
+      "description": "interrupt: tell the operator now. summarize: hold for report_status. log: record only. ask: ask the operator a yes/no question first."
+    },
+    "Command": {
+      "description": "One command from the language model. Exactly one action with its params. Key order is fixed: action, then params.",
+      "oneOf": [
+        {
+          "title": "goto",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "goto" },
+            "params": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["place", "alt_m"],
+                  "properties": {
+                    "place": { "$ref": "#/$defs/Place" },
+                    "alt_m": { "$ref": "#/$defs/AltM" }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["lat", "lon", "alt_m"],
+                  "properties": {
+                    "lat": { "$ref": "#/$defs/Lat" },
+                    "lon": { "$ref": "#/$defs/Lon" },
+                    "alt_m": { "$ref": "#/$defs/AltM" }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "search_area",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "search_area" },
+            "params": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["place", "radius_m", "alt_m", "target"],
+                  "properties": {
+                    "place": { "$ref": "#/$defs/Place" },
+                    "radius_m": { "$ref": "#/$defs/RadiusM" },
+                    "alt_m": { "$ref": "#/$defs/AltM" },
+                    "target": { "$ref": "#/$defs/TargetType" }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["lat", "lon", "radius_m", "alt_m", "target"],
+                  "properties": {
+                    "lat": { "$ref": "#/$defs/Lat" },
+                    "lon": { "$ref": "#/$defs/Lon" },
+                    "radius_m": { "$ref": "#/$defs/RadiusM" },
+                    "alt_m": { "$ref": "#/$defs/AltM" },
+                    "target": { "$ref": "#/$defs/TargetType" }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "loiter",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "loiter" },
+            "params": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["event_id", "radius_m", "duration_s"],
+                  "properties": {
+                    "event_id": { "$ref": "#/$defs/EventId" },
+                    "radius_m": { "$ref": "#/$defs/RadiusM" },
+                    "duration_s": { "$ref": "#/$defs/DurationS" }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["place", "radius_m", "duration_s"],
+                  "properties": {
+                    "place": { "$ref": "#/$defs/Place" },
+                    "radius_m": { "$ref": "#/$defs/RadiusM" },
+                    "duration_s": { "$ref": "#/$defs/DurationS" }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["lat", "lon", "radius_m", "duration_s"],
+                  "properties": {
+                    "lat": { "$ref": "#/$defs/Lat" },
+                    "lon": { "$ref": "#/$defs/Lon" },
+                    "radius_m": { "$ref": "#/$defs/RadiusM" },
+                    "duration_s": { "$ref": "#/$defs/DurationS" }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "hold",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "hold" },
+            "params": { "type": "object", "additionalProperties": false, "maxProperties": 0 }
+          }
+        },
+        {
+          "title": "return_home",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "return_home" },
+            "params": { "type": "object", "additionalProperties": false, "maxProperties": 0 }
+          }
+        },
+        {
+          "title": "report_status",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "report_status" },
+            "params": { "type": "object", "additionalProperties": false, "maxProperties": 0 }
+          }
+        },
+        {
+          "title": "clarify",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "clarify" },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["reason", "question"],
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "missing_location",
+                    "missing_altitude",
+                    "ambiguous_reference",
+                    "unsupported_action",
+                    "unsafe_request",
+                    "unclear_speech"
+                  ]
+                },
+                "question": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160,
+                  "description": "One short question for the operator."
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Event": {
+      "description": "One simulated detection. Emitted by the scripted event emitter when the drone is near a planted event. Perception is simulated in the MVP.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "confidence", "lat", "lon", "time_s", "people_visible"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EventId" },
+        "type": { "$ref": "#/$defs/EventType" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "lat": { "$ref": "#/$defs/Lat" },
+        "lon": { "$ref": "#/$defs/Lon" },
+        "time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Seconds since the simulation started."
+        },
+        "people_visible": { "type": "integer", "minimum": 0, "maximum": 99 },
+        "subtype": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Optional detail such as truck or sedan."
+        }
+      }
+    },
+    "MissionState": {
+      "description": "The one shared copy of mission memory, held by mission_state.py. The safety gate, scorer and prompt builder read it. None of them keeps its own copy.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "area", "geofence", "home", "already_reported", "pending_question", "mode"],
+      "properties": {
+        "target": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/TargetType" }],
+          "description": "Set by the last search_area command. Null when no search is active."
+        },
+        "area": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["lat", "lon", "radius_m", "alt_m"],
+              "properties": {
+                "lat": { "$ref": "#/$defs/Lat" },
+                "lon": { "$ref": "#/$defs/Lon" },
+                "radius_m": { "$ref": "#/$defs/RadiusM" },
+                "alt_m": { "$ref": "#/$defs/AltM" }
+              }
+            }
+          ],
+          "description": "Active search area after place names are resolved."
+        },
+        "geofence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lat", "lon", "radius_m", "max_alt_m"],
+          "properties": {
+            "lat": { "$ref": "#/$defs/Lat" },
+            "lon": { "$ref": "#/$defs/Lon" },
+            "radius_m": { "$ref": "#/$defs/RadiusM" },
+            "max_alt_m": { "$ref": "#/$defs/AltM" }
+          },
+          "description": "Limits the safety gate enforces. Values come from config, not from the schema."
+        },
+        "home": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["lat", "lon"],
+              "properties": {
+                "lat": { "$ref": "#/$defs/Lat" },
+                "lon": { "$ref": "#/$defs/Lon" }
+              }
+            }
+          ],
+          "description": "Read from the simulator. Null until the sim reports it."
+        },
+        "already_reported": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/EventId" },
+          "description": "Event ids already sent to the operator, used for deduplication."
+        },
+        "pending_question": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["text", "event_id", "proposed_command"],
+              "properties": {
+                "text": { "type": "string", "minLength": 1, "maxLength": 240 },
+                "event_id": {
+                  "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/EventId" }]
+                },
+                "proposed_command": {
+                  "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/Command" }],
+                  "description": "What a yes answer would run. Null when the question is open-ended."
+                }
+              }
+            }
+          ],
+          "description": "The yes/no question waiting for the operator. Passed to the model so it knows what yes means."
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["manual", "ai"],
+          "description": "manual: the operator flies. ai: commands go through the language model and safety gate."
+        }
+      }
+    },
+    "Rule": {
+      "description": "One entry in rules.json.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "event_type", "condition", "priority", "min_confidence", "action", "reason", "safety_relevant"],
+      "properties": {
+        "id": { "$ref": "#/$defs/RuleId" },
+        "event_type": {
+          "oneOf": [
+            { "$ref": "#/$defs/EventType" },
+            { "const": "any" }
+          ]
+        },
+        "condition": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "All listed keys must hold. An empty object always holds.",
+          "properties": {
+            "people_visible_min": { "type": "integer", "minimum": 1, "maximum": 99 },
+            "in_search_area": { "type": "boolean" },
+            "matches_target": { "type": "boolean" }
+          }
+        },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+        "min_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confidence needed for action to apply as written."
+        },
+        "action": { "$ref": "#/$defs/Tier" },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Plain-language reason, quoted in the message to the operator."
+        },
+        "safety_relevant": {
+          "type": "boolean",
+          "description": "True when missing this event could put people or the aircraft at risk."
+        }
+      }
+    },
+    "RulesFile": {
+      "description": "Shape of rules.json.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rules"],
+      "properties": {
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Rule" }
+        }
+      }
+    },
+    "OperatorMessage": {
+      "description": "One message to the operator, produced after scoring.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tier", "event_id", "rule_id", "text", "expects_reply"],
+      "properties": {
+        "tier": { "$ref": "#/$defs/Tier" },
+        "event_id": { "$ref": "#/$defs/EventId" },
+        "rule_id": { "$ref": "#/$defs/RuleId" },
+        "text": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "expects_reply": {
+          "type": "boolean",
+          "description": "True for the ask tier. The text then ends with a yes/no question."
+        }
+      }
+    }
+  }
+}
