@@ -7,7 +7,7 @@ from pathlib import Path
 import jsonschema
 import pytest
 
-from schema_to_gbnf import SCHEMA_PATH, command_validator, int_range, pattern_to_gbnf, schema_to_gbnf
+from make_grammar import SCHEMA_PATH, command_validator, int_range, pattern_to_gbnf, schema_to_gbnf
 
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA = json.loads(SCHEMA_PATH.read_text())

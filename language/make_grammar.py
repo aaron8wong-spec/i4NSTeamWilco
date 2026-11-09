@@ -11,7 +11,7 @@ patterns (place, event_id). It cannot enforce bounds on non-integer numbers, so
 lat and lon ranges are checked by jsonschema, not by decoding. Real safety limits
 belong to the safety gate.
 
-Usage: python3 language/schema_to_gbnf.py [schemas.json] [out.gbnf]
+Usage: python3 language/make_grammar.py [schemas.json] [out.gbnf]
 """
 import json
 import sys

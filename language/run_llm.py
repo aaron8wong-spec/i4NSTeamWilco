@@ -14,7 +14,7 @@ import time
 import urllib.request
 from pathlib import Path
 
-from schema_to_gbnf import SCHEMA_PATH, command_validator
+from make_grammar import SCHEMA_PATH, command_validator
 
 HERE = Path(__file__).parent
 ROOT = HERE.parent
