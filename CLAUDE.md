@@ -1,5 +1,5 @@
 i4NS Army-737 "Say Less, Fly More": Team Context for AI Assistants
-Last updated: week 5 (2026-10-29). Paste this whole document into your AI tool, then tell it: "I am role R_ (name the role). My current task is _." The AI should then work from this document and ask before breaking any rule in section 9.
+Last updated: week 6 (2026-11-09). Schemas frozen at v1.0.0 (team vote done). Paste this whole document into your AI tool, then tell it: "I am role R_ (name the role). My current task is _." The AI should then work from this document and ask before breaking any rule in section 9.
 
 0. Instructions to the AI assistant reading this
 You are helping one member of a five-person university team build a 10-week MVP of a sponsor challenge. Use this document as the source of truth.
@@ -39,14 +39,14 @@ What links them is the mission. A command like "search the north field for vehic
 One demo scenario (everything is built to serve this):
 Operator: "Search the north field for vehicles."
 Drone flies the search pattern in the simulator.
-Scripted events appear at waypoints: a deer, a truck, a truck with two people, a low-confidence blob.
+Planted events fire as the drone nears them: a deer, a truck, a truck with two people, a low-confidence blob.
 Scorer: deer → log; truck → summarize; truck with people → interrupt; low-confidence risky object → ask first.
 Drone says: "Vehicle with two people at the east edge. Loiter?"
 Operator: "Yes, loiter." The drone loiters.
 Core design rule: the LLM suggests, deterministic code decides. The language model only turns text into one of a fixed set of JSON commands. A safety gate in plain code checks every command. The language model never talks to the autopilot directly.
 Architecture:
 COMMAND PATH:
-  voice -> whisper.cpp -> text -> llama.cpp + GBNF grammar -> JSON command
+  voice -> whisper.cpp -> text (+ mission_state) -> llama.cpp + GBNF grammar -> JSON command
         -> safety gate -> MAVSDK -> PX4 SITL + Gazebo -> drone moves
 
 REPORT PATH:
@@ -55,6 +55,14 @@ REPORT PATH:
         -> templated message -> operator (text on screen; speech is a stretch)
 
 SHARED: schemas, mission_state, eval harness, hardware benchmarks
+
+When the REPORT PATH asks a question ("Loiter?"), the operator's answer re-enters the COMMAND PATH, with mission_state.pending_question passed to the model so "yes" means something.
+
+How event planting works (what is real and what is faked: the drone's "vision" is faked, everything else is real):
+A scenario file lists the planted finds as meters north and east of home: id, type, people_visible, confidence.
+A Python loop reads the drone's position from MAVSDK, converts it to meters from home, and fires each find once when the drone gets within about 60 m. The 60 m stands in for camera range. A small random amount is added to the confidence.
+Gazebo truck and person models are optional and only for looks. Events never come from Gazebo.
+Two gotchas: read the home position from the sim instead of hardcoding it, and convert lat/lon to meters correctly.
 
 4. Scope: what we build, and what we do NOT build
 In scope (must have):
@@ -69,41 +77,56 @@ Honest limits we must state in every presentation:
 Perception is simulated. Events are scripted, not detected by vision.
 Results are from a simulator, not real flights.
 Accuracy numbers come from our own synthetic data.
-5. Schemas (DRAFT, to be frozen by end of week 5)
-Units: meters, seconds, WGS84 lat/lon. Altitude is meters above home. Changes after the freeze need a team vote.
-Command (the only things the language model may output):
-{"action": "goto", "params": {"lat": 32.88, "lon": -117.24, "alt_m": 40}}
-{"action": "search_area", "params": {"center": {"lat": 32.88, "lon": -117.24}, "radius_m": 150, "alt_m": 50, "target": "vehicle"}}
-{"action": "loiter", "params": {"center": {"lat": 32.88, "lon": -117.24}, "radius_m": 30, "duration_s": 120, "alt_m": 40}}
+5. Schemas (FROZEN v1.0.0)
+Source of truth: integration/schemas.json (JSON Schema). Explanation and examples: docs/schemas.md. Both were frozen after the team vote. Any change needs a team vote, a version bump, a grammar rebuild (python3 language/make_grammar.py), updated seeds and a re-run of the accuracy eval. If this section and schemas.json disagree, schemas.json wins; fix this section.
+Units: meters, seconds, WGS84 lat/lon. Altitude is meters above home. Names carry the unit: alt_m, radius_m, duration_s, time_s. Distances and times in commands are whole numbers.
+Command (the only things the language model may output). One JSON object, "action" first, then "params". Seven actions:
+{"action": "goto", "params": {"place": "north_field", "alt_m": 40}}
+{"action": "search_area", "params": {"place": "north_field", "radius_m": 150, "alt_m": 50, "target": "vehicle"}}
+{"action": "loiter", "params": {"event_id": "E03", "radius_m": 30, "duration_s": 120}}
 {"action": "hold", "params": {}}
 {"action": "return_home", "params": {}}
-{"action": "clarify", "params": {"question": "How high should I fly?"}}
+{"action": "report_status", "params": {}}
+{"action": "clarify", "params": {"reason": "missing_altitude", "question": "How high should I fly?"}}
 
-clarify is used for vague, impossible or unsafe requests. Multi-step commands (week 8) use {"steps": [ ...commands... ]}.
+Location in goto, search_area and loiter is given one way, never mixed: a place name, or lat plus lon, or (loiter only) an event_id. The model should prefer place and use lat/lon only when the operator states coordinates.
+search_area target is one of vehicle, person, structure, any. loiter has no altitude (it keeps the current one). report_status reads out what was found since the last report (the summarize list).
+clarify reason is one of missing_location, missing_altitude, ambiguous_reference, unsupported_action, unsafe_request, unclear_speech. Use clarify for vague, impossible or unsafe requests. Do not guess a value.
+Ranges in the schema are outer bounds so the grammar can keep the model inside them. They are not safety limits. The safety gate applies the real limits and refuses with a reason (alt_m 800 is valid JSON the gate can refuse).
+Not in v1.0.0 (adding any is a schema change): multi-step commands (a list of commands), relative moves ("up 200 feet"), "follow me", and anything involving weapons or engagement.
+Places: a place name must be resolved to lat/lon by code from a places table. A name not in the table is refused with a reason (it is not a model failure). The table does not exist yet. We will build it from the simulation world once the sim scenario looks right. Owner to be decided.
 Event (what the simulated drone "sees"):
-{"id": "E07", "type": "vehicle", "confidence": 0.82, "lat": 32.881, "lon": -117.239, "time_s": 135, "people_visible": 2}
+{"id": "E03", "type": "vehicle", "confidence": 0.79, "lat": 32.8821, "lon": -117.2384, "time_s": 142.5, "people_visible": 2, "subtype": "truck"}
 
-type is one of vehicle, person, wildlife, structure, unknown.
-mission_state (shared by both paths):
+type is one of vehicle, person, structure, wildlife, unknown. subtype is optional (up to 32 characters). Ids look like E03.
+mission_state (one shared copy, owned by mission_state.py; other modules read it and keep no copies of their own):
 {
   "target": "vehicle",
-  "area": {"center": {"lat": 32.88, "lon": -117.24}, "radius_m": 150},
-  "geofence": {"max_alt_m": 120, "radius_m": 500},
-  "already_reported": ["E03"],
-  "pending_question": null,
+  "area": {"lat": 32.8815, "lon": -117.2380, "radius_m": 150, "alt_m": 50},
+  "geofence": {"lat": 32.8800, "lon": -117.2400, "radius_m": 500, "max_alt_m": 120},
+  "home": {"lat": 32.8800, "lon": -117.2400},
+  "already_reported": ["E01"],
+  "pending_question": {"text": "Vehicle, 2 people nearby (rule R03: vehicle with people is high priority). Loiter there?", "event_id": "E03", "proposed_command": {"action": "loiter", "params": {"event_id": "E03", "radius_m": 30, "duration_s": 120}}},
   "mode": "ai"
 }
 
-Rule (in rules.json):
-{"id": "R07", "applies_to": "vehicle", "condition": "people_visible >= 1", "priority": "high", "min_confidence": 0.6, "action": "interrupt", "reason": "A vehicle with people nearby is high priority."}
+target, area, home and pending_question can be null. The geofence values are an example, not our limits; they come from config. home is read from the sim.
+Rule (one entry in rules.json, which is {"rules": [ ... ]}):
+{"id": "R03", "event_type": "vehicle", "condition": {"people_visible_min": 1}, "priority": "high", "min_confidence": 0.6, "action": "interrupt", "reason": "vehicle with people is high priority", "safety_relevant": true}
+
+event_type is an event type or "any". condition keys are optional (people_visible_min, in_search_area, matches_target); all listed keys must hold and {} always holds. action is a tier: interrupt, summarize, log or ask. reason is up to 200 characters.
+OperatorMessage (what the scorer produces for the operator):
+{"tier": "ask", "event_id": "E03", "rule_id": "R03", "text": "Vehicle, 2 people nearby (rule R03: vehicle with people is high priority). Loiter there?", "expects_reply": true}
 
 6. Scoring logic (version 0, plain code)
 For each event, in this order:
 If event.id is already in already_reported, or it is a near-duplicate of one, tier = log.
-Find rules matching event.type (and the condition). Take the highest priority.
-If the type does not match mission_state.target and the rule is not safety-relevant, tier = log.
+Find rules matching event.type (or "any") and the condition. Take the highest priority.
+If the type does not match mission_state.target and the rule is not safety_relevant, tier = log.
 If priority is high and event.confidence < rule.min_confidence, tier = ask, and set pending_question.
 Otherwise: high priority -> interrupt; medium -> summarize; low -> log.
+Summarized events wait until the operator asks (report_status).
+Still to be written down by R4 in the scoring spec: what happens when an event matches a rule but is below min_confidence and the priority is not high, and which rule wins when several match with the same priority.
 The message is a template that includes the rule's reason, so every alert can say why.
 The LLM may be used later to reword messages. It does not make the decision.
 7. Safety gate (every command must pass)
@@ -112,7 +135,7 @@ Maximum altitude.
 Minimum battery to continue (below it, force return home).
 Lost-link behavior: hold, then return home.
 Manual override: if mode is manual, AI commands are ignored.
-Anything outside the schema or outside limits is refused, not "fixed."
+Anything outside the schema or outside limits is refused, not "fixed." That includes a place name that is not in the places table.
 8. Roles, tasks and gates
 Five roles. Owner names are filled in by the team: R1 ____, R2 ____, R3 ____, R4 ____, R5 ____.
 Definition of done for every task: merged to main, has a test or a logged number, and has one line in the README.
@@ -130,13 +153,13 @@ MAVSDK script: arm, take off, fly to a point, land
 safety.py with unit tests
 6
 6.2
-Implement the five actions, including a search_area sweep pattern
+Implement the five flight actions (goto, search_area, loiter, hold, return_home), including a search_area sweep pattern
 6
 6.3
 Waypoint callback that reports the drone's position
 6
 7.3
-Event emitter: fire a scripted event when the drone is within a set distance, with confidence noise
+Event emitter: read a scenario file (finds as meters north/east of home), fire each find once when the drone is within about 60 m, with confidence noise; read home from the sim
 7
 8.3
 Multi-step command and lost-link demo
@@ -150,7 +173,7 @@ ID
 Task
 Week
 5.5
-llama.cpp with a 3-8B quantized model; GBNF grammar generated from schemas.json
+llama.cpp with a 3-8B quantized model; GBNF grammar generated from integration/schemas.json (language/make_grammar.py)
 5
 5.6
 40 seed commands with correct JSON, including 8 vague or unsafe ones that map to clarify
@@ -225,7 +248,7 @@ Week
 Repo and folder structure
 5
 5.2
-schemas.json and schemas.md; get them frozen
+schemas.json and schemas.md; get them frozen (done, v1.0.0)
 5
 5.9
 Book 3 interviews; log them
@@ -290,7 +313,7 @@ Python sounddevice
 Push-to-talk
 Schemas
 JSON Schema with pydantic or jsonschema
-One source of truth: schemas.json
+One source of truth: integration/schemas.json
 Rules and events
 Plain JSON files and Python
 ChromaDB only as a stretch
@@ -310,6 +333,7 @@ reporting/     # rules.json, events, scorer, templates
 integration/   # mission_state.py, run_command.py, main.py
 data/          # seeds.jsonl, train.jsonl, test.jsonl, labeled_events.json
 docs/          # schemas.md, results, hardware table, roadmap
+(schemas.json lives in integration/)
 
 11. Week 9 test targets (proposed, not yet agreed)
 Test

@@ -14,21 +14,27 @@ import time
 import urllib.request
 from pathlib import Path
 
-import jsonschema
+from make_grammar import SCHEMA_PATH, command_validator
 
 HERE = Path(__file__).parent
 ROOT = HERE.parent
 GRAMMAR = (HERE / "command.gbnf").read_text()
-VALIDATOR = jsonschema.Draft202012Validator(json.loads((HERE / "schemas.json").read_text()))
+VALIDATOR = command_validator(json.loads(SCHEMA_PATH.read_text()))
 
 SYSTEM = """You turn an operator's typed request into exactly one JSON drone command.
-Actions: goto, search_area, loiter, hold, return_home, clarify.
-Units: meters, seconds, WGS84 lat/lon. Altitude is meters above home.
-Use clarify (with one short question) when the request is vague, is missing a
-location, altitude, radius, duration or target, or is unsafe. Never guess numbers.
+Actions: goto, search_area, loiter, hold, return_home, report_status, clarify.
+Units: whole meters and whole seconds (convert feet and minutes). Altitude is meters above home.
+Location: use a snake_case place name (north_field) when the operator names a place, lat and lon
+when they give coordinates, and for loiter an event_id (E03) when they name an event. Never mix them.
+loiter has no altitude. search_area target is vehicle, person, structure or any.
+report_status reads out what has been found so far.
+Use clarify when the request is vague, is missing a location, altitude, radius, duration or
+target, is outside these actions, or is unsafe. Never guess numbers or coordinates.
+clarify reason is one of missing_location, missing_altitude, ambiguous_reference,
+unsupported_action, unsafe_request, unclear_speech. Add one short question.
 Examples:
 Request: Land the plane at the airport.
-{"action":"clarify","params":{"question":"I can only fly the commands I know. Do you want me to return home?"}}
+{"action":"clarify","params":{"reason":"unsupported_action","question":"I can only fly the commands I know. Do you want me to return home?"}}
 Request: Stay in the air.
 {"action":"hold","params":{}}"""
 

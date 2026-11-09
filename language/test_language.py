@@ -7,12 +7,12 @@ from pathlib import Path
 import jsonschema
 import pytest
 
-from schema_to_gbnf import schema_to_gbnf
+from make_grammar import SCHEMA_PATH, command_validator, int_range, pattern_to_gbnf, schema_to_gbnf
 
 ROOT = Path(__file__).resolve().parent.parent
-SCHEMA = json.loads((ROOT / "language" / "schemas.json").read_text())
+SCHEMA = json.loads(SCHEMA_PATH.read_text())
 SEEDS = [json.loads(line) for line in (ROOT / "data" / "seeds.jsonl").read_text().splitlines()]
-VALIDATOR = jsonschema.Draft202012Validator(SCHEMA)
+VALIDATOR = command_validator(SCHEMA)
 
 
 # --- seeds (task 5.6) ---
@@ -34,7 +34,7 @@ def test_seed_matches_schema(seed):
 
 def test_every_action_is_covered():
     actions = {s["expected"]["action"] for s in SEEDS}
-    assert actions == {"goto", "search_area", "loiter", "hold", "return_home", "clarify"}
+    assert actions == {"goto", "search_area", "loiter", "hold", "return_home", "report_status", "clarify"}
 
 
 # --- grammar (task 5.5) ---
@@ -55,16 +55,48 @@ def test_every_referenced_rule_is_defined():
     assert used <= defined, used - defined
 
 
-def test_root_lists_all_six_actions():
+def test_root_lists_all_seven_actions():
     root = next(l for l in GBNF.splitlines() if l.startswith("root ::="))
-    assert root.count("cmd-") == 6
+    assert root.count("cmd-") == 7
 
 
 def test_unsupported_schema_raises():
-    bad = {"oneOf": [{"type": "object", "properties": {"action": {"const": "x"}},
-                      "required": [], "additionalProperties": False}]}
+    bad = {"$defs": {"Command": {"oneOf": [{"type": "object", "properties": {"action": {"const": "x"}},
+                                             "required": [], "additionalProperties": False}]}}}
     with pytest.raises(NotImplementedError):
         schema_to_gbnf(bad)
+
+
+@pytest.mark.parametrize("lo,hi", [(1, 1000), (5, 5000), (1, 3600), (7, 7), (1, 9), (95, 105), (0, 12)])
+def test_int_range_matches_exactly_lo_to_hi(lo, hi):
+    regex = re.compile(re.sub(r'"(\d)"', r"\1", int_range(lo, hi)).replace(" ", "") + "$")
+    for n in range(0, hi + 50):
+        assert bool(regex.match(str(n))) == (lo <= n <= hi), n
+    assert not regex.match("0" + str(lo))  # no leading zeros
+
+
+def test_pattern_to_gbnf():
+    assert pattern_to_gbnf("^E[0-9]{2,4}$") == '"\\"" "E" [0-9]{2,4} "\\""'
+    with pytest.raises(NotImplementedError):
+        pattern_to_gbnf("^a+$")
+
+
+# --- the frozen docs/schemas.md examples must validate ---
+
+EXAMPLE_DEFS = {"command": "Command", "event": "Event", "mission_state": "MissionState",
+                "rule": "Rule", "message": "OperatorMessage"}
+MD = (ROOT / "docs" / "schemas.md").read_text()
+EXAMPLES = re.findall(r"```json (\w+)\n(.*?)\n```", MD, flags=re.S)
+
+
+@pytest.mark.parametrize("kind,text", EXAMPLES)
+def test_schemas_md_example_validates(kind, text):
+    v = jsonschema.Draft202012Validator({"$ref": f"#/$defs/{EXAMPLE_DEFS[kind]}", "$defs": SCHEMA["$defs"]})
+    v.validate(json.loads(text))
+
+
+def test_schemas_md_has_all_example_kinds():
+    assert {k for k, _ in EXAMPLES} == set(EXAMPLE_DEFS)
 
 
 @pytest.mark.skipif(shutil.which("llama-gbnf-validator") is None,
