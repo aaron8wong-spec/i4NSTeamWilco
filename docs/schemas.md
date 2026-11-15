@@ -10,7 +10,7 @@
 | `Rule` / `RulesFile` | `rules.json` (R4) | scorer (R4) |
 | `OperatorMessage` | scorer and message templates (R4) | operator output (R3, R5) |
 
-Version: 1.1.0. Schemas are frozen. A change needs a team vote, then a version bump, then a re-run of `make_grammar.py`, an update of the seeds, and a re-run of the accuracy eval, because earlier numbers no longer apply.
+Version: 1.2.0. Schemas are frozen. A change needs a team vote, then a version bump, then a re-run of `make_grammar.py`, an update of the seeds, and a re-run of the accuracy eval, because earlier numbers no longer apply.
 
 ## Conventions
 
@@ -224,15 +224,21 @@ The scorer (R4) owns matching, tie-breaking and deduplication. This file only fi
 
 ## Change log
 
+### 1.2.0
+
+Adds vertical relative moves. Needs the team vote recorded before tagging.
+
+- Adds `climb` and `descend`: `amount_m` only, from the current altitude, over the same spot. Two actions because the grammar cannot write negative numbers. Adds the `ChangeM` definition (1 to 1000 m).
+- Seeds S54 to S57 added (2 `climb`, 2 `descend`). The accuracy eval must be re-run, because earlier numbers no longer apply.
+
 ### 1.1.0
 
-Adds relative moves, horizontal and vertical. Needs the team vote recorded before tagging.
+Adds horizontal relative moves. Needs the team vote recorded before tagging.
 
 - Adds the `move` action: `distance_m`, `bearing_deg`, `alt_m`. Relative to the drone's current position. `alt_m` is required.
 - Adds the `DistanceM` (1 to 10000 m) and `BearingDeg` (0 to 359) definitions. The ranges are outer bounds; the safety gate applies the real limits.
-- Adds `climb` and `descend`: `amount_m` only, from the current altitude. Two actions because the grammar cannot write negative numbers. Adds the `ChangeM` definition (1 to 1000 m).
 - Compass words are not accepted. The model answers `clarify` with `ambiguous_reference`. No new `clarify` reason was added.
-- Seeds S41 to S57 added (9 `move`, 4 `clarify`, 2 `climb`, 2 `descend`). The accuracy eval must be re-run, because earlier numbers no longer apply.
+- Seeds S41 to S53 added (9 `move`, 4 `clarify`). The accuracy eval must be re-run, because earlier numbers no longer apply.
 
 ### 1.0.0
 
