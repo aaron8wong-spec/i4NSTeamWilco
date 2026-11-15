@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "i4NS Army-737 MVP schemas",
   "description": "Shared data contracts for the Say Less, Fly More MVP. Command is what the language model emits. Event is what the simulated drone reports. MissionState is the shared mission memory. Rule is one entry in rules.json. OperatorMessage is what the operator hears or sees. Units: metres, seconds, degrees (WGS84). Altitude is metres above the home point. See schemas.md.",
-  "x-schema-version": "1.0.0",
+  "x-schema-version": "1.1.0",
   "$defs": {
     "Lat": {
       "type": "number",
@@ -33,6 +33,18 @@
       "minimum": 1,
       "maximum": 3600,
       "description": "Duration in whole seconds."
+    },
+    "DistanceM": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000,
+      "description": "Distance in whole metres to travel from the drone's current position. The range is wide on purpose so the safety gate, not the grammar, decides what is too far and can tell the operator why."
+    },
+    "BearingDeg": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 359,
+      "description": "Direction in whole degrees, clockwise from true north: 0 is north, 90 east, 180 south, 270 west. Compass words are not accepted; the model asks instead."
     },
     "Place": {
       "type": "string",
@@ -176,6 +188,25 @@
                   }
                 }
               ]
+            }
+          }
+        },
+        {
+          "title": "move",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "move" },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["distance_m", "bearing_deg", "alt_m"],
+              "properties": {
+                "distance_m": { "$ref": "#/$defs/DistanceM" },
+                "bearing_deg": { "$ref": "#/$defs/BearingDeg" },
+                "alt_m": { "$ref": "#/$defs/AltM" }
+              }
             }
           }
         },

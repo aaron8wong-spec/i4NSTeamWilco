@@ -10,7 +10,7 @@
 | `Rule` / `RulesFile` | `rules.json` (R4) | scorer (R4) |
 | `OperatorMessage` | scorer and message templates (R4) | operator output (R3, R5) |
 
-Version: 1.0.0. Schemas are frozen. A change needs a team vote, then a version bump, then a re-run of `make_grammar.py`, an update of the seeds, and a re-run of the accuracy eval, because earlier numbers no longer apply.
+Version: 1.1.0. Schemas are frozen. A change needs a team vote, then a version bump, then a re-run of `make_grammar.py`, an update of the seeds, and a re-run of the accuracy eval, because earlier numbers no longer apply.
 
 ## Conventions
 
@@ -25,13 +25,14 @@ Version: 1.0.0. Schemas are frozen. A change needs a team vote, then a version b
 
 ## Command
 
-A command is one JSON object: `{"action": "<name>", "params": {...}}`. Seven actions.
+A command is one JSON object: `{"action": "<name>", "params": {...}}`. Eight actions.
 
 | Action | Params | Meaning |
 |---|---|---|
 | `goto` | location, `alt_m` | Fly to a point and stop there. |
 | `search_area` | location, `radius_m`, `alt_m`, `target` | Sweep a circle for a target type. Sets `target` and `area` in mission state. |
 | `loiter` | location, `radius_m`, `duration_s` | Circle a point, then hold. Altitude stays as it is. |
+| `move` | `distance_m`, `bearing_deg`, `alt_m` | Fly a distance in a direction from the drone's current position, then stop. Not a place or coordinates. |
 | `hold` | none | Stop and hold position. |
 | `return_home` | none | Fly to the home point and land. |
 | `report_status` | none | Read out what has been found since the last report (the summarize list). |
@@ -40,6 +41,8 @@ A command is one JSON object: `{"action": "<name>", "params": {...}}`. Seven act
 Location is `place` or `lat` + `lon`. For `loiter` it can also be `event_id`.
 
 `target` is one of `vehicle`, `person`, `structure`, `any`.
+
+`move` is relative to where the drone is when the command runs. `bearing_deg` is whole degrees clockwise from true north (0 north, 90 east, 180 south, 270 west). `distance_m` is whole metres. `alt_m` is required and is metres above home, as for `goto`. Compass words such as "northeast" are not accepted: the model answers `clarify` with `ambiguous_reference` and asks for degrees. Code works out the destination from the live position, and the safety gate checks it against the geofence around home.
 
 `clarify.reason` is one of `missing_location`, `missing_altitude`, `ambiguous_reference`, `unsupported_action`, `unsafe_request`, `unclear_speech`. `question` is one short question, up to 160 characters.
 
@@ -57,6 +60,10 @@ Examples:
 
 ```json command
 {"action": "loiter", "params": {"event_id": "E03", "radius_m": 30, "duration_s": 120}}
+```
+
+```json command
+{"action": "move", "params": {"distance_m": 500, "bearing_deg": 45, "alt_m": 40}}
 ```
 
 ```json command
@@ -88,7 +95,7 @@ The language model only suggests a command. Plain code decides.
 
 These came up in interviews or in testing and are deliberately left out of the MVP. Adding any of them is a schema change.
 
-- Relative moves such as "go up 200 feet" or "10 m north".
+- Vertical or compass-word relative moves such as "go up 200 feet" or "10 m north". (`move` in 1.1.0 covers only distance plus a bearing in degrees.)
 - "Follow me".
 - Multi-step missions as a list of commands. One request maps to one command for now.
 - Weapons or engagement of any kind. Positive identification and engagement stay with the human.
@@ -203,6 +210,15 @@ The scorer (R4) owns matching, tie-breaking and deduplication. This file only fi
 - Validate `rules.json` against `$defs/RulesFile` in CI or at load time.
 
 ## Change log
+
+### 1.1.0
+
+Adds relative moves. Needs the team vote recorded before tagging.
+
+- Adds the `move` action: `distance_m`, `bearing_deg`, `alt_m`. Relative to the drone's current position. `alt_m` is required.
+- Adds the `DistanceM` (1 to 10000 m) and `BearingDeg` (0 to 359) definitions. The ranges are outer bounds; the safety gate applies the real limits.
+- Compass words are not accepted. The model answers `clarify` with `ambiguous_reference`. No new `clarify` reason was added.
+- Seeds S41 to S53 added (9 `move`, 4 `clarify`). The accuracy eval must be re-run, because earlier numbers no longer apply.
 
 ### 1.0.0
 

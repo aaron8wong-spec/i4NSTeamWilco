@@ -18,13 +18,13 @@ VALIDATOR = command_validator(SCHEMA)
 # --- seeds (task 5.6) ---
 
 def test_seed_count_and_clarify_count():
-    assert len(SEEDS) == 40
-    assert sum(s["expected"]["action"] == "clarify" for s in SEEDS) == 8
+    assert len(SEEDS) == 53
+    assert sum(s["expected"]["action"] == "clarify" for s in SEEDS) == 12
 
 
 def test_seed_ids_and_texts_are_unique():
-    assert len({s["id"] for s in SEEDS}) == 40
-    assert len({s["text"] for s in SEEDS}) == 40
+    assert len({s["id"] for s in SEEDS}) == 53
+    assert len({s["text"] for s in SEEDS}) == 53
 
 
 @pytest.mark.parametrize("seed", SEEDS, ids=[s["id"] for s in SEEDS])
@@ -34,7 +34,7 @@ def test_seed_matches_schema(seed):
 
 def test_every_action_is_covered():
     actions = {s["expected"]["action"] for s in SEEDS}
-    assert actions == {"goto", "search_area", "loiter", "hold", "return_home", "report_status", "clarify"}
+    assert actions == {"goto", "search_area", "loiter", "move", "hold", "return_home", "report_status", "clarify"}
 
 
 # --- grammar (task 5.5) ---
@@ -55,9 +55,9 @@ def test_every_referenced_rule_is_defined():
     assert used <= defined, used - defined
 
 
-def test_root_lists_all_seven_actions():
+def test_root_lists_all_eight_actions():
     root = next(l for l in GBNF.splitlines() if l.startswith("root ::="))
-    assert root.count("cmd-") == 7
+    assert root.count("cmd-") == 8
 
 
 def test_unsupported_schema_raises():
