@@ -3,7 +3,8 @@
 
 This is a test bridge, not the final R1/R5 code. It proves the contract:
 schema-valid JSON -> safety check -> MAVSDK -> drone moves.
-It handles goto (lat/lon), hold and return_home. Other actions are printed and skipped.
+It handles goto (lat/lon), move, hold and return_home. Other actions are printed and skipped.
+A move is turned into a goto from the drone's current position, then gated like any goto.
 
 The seed coordinates are around the Gazebo Baylands world (home 37.412173, -121.998878).
 Start PX4 in that world, or every goto is hundreds of km from home and the gate refuses it
@@ -37,7 +38,7 @@ TAKEOFF_ALT_M = 10
 ARRIVE_HORIZ_M = 3.0
 ARRIVE_VERT_M = 2.0
 GOTO_TIMEOUT_S = 180
-SUPPORTED = {"goto", "hold", "return_home"}
+SUPPORTED = {"goto", "move", "hold", "return_home"}
 
 
 def load_validator():
@@ -56,6 +57,15 @@ def distance_m(lat1, lon1, lat2, lon2):
     return 2 * r * math.asin(math.sqrt(a))
 
 
+def destination_point(lat, lon, bearing_deg, dist_m):
+    """Point reached by going dist_m meters from (lat, lon) on a bearing (degrees clockwise from north)."""
+    r = 6371000.0
+    p1, l1, th, dr = math.radians(lat), math.radians(lon), math.radians(bearing_deg), dist_m / r
+    p2 = math.asin(math.sin(p1) * math.cos(dr) + math.cos(p1) * math.sin(dr) * math.cos(th))
+    l2 = l1 + math.atan2(math.sin(th) * math.sin(dr) * math.cos(p1), math.cos(dr) - math.sin(p1) * math.sin(p2))
+    return math.degrees(p2), (math.degrees(l2) + 540) % 360 - 180
+
+
 def check_command(cmd, validator, home=None):
     """Return (ok, reason). Schema first, then simple test limits."""
     errors = sorted(validator.iter_errors(cmd), key=lambda e: list(e.path))
@@ -64,6 +74,10 @@ def check_command(cmd, validator, home=None):
     action, p = cmd["action"], cmd["params"]
     if action not in SUPPORTED:
         return False, f"'{action}' is valid JSON but this smoke test only flies {sorted(SUPPORTED)}"
+    if action == "move":
+        # The destination depends on the live position, so the geofence is checked on the goto it becomes.
+        if p["alt_m"] > MAX_ALT_M:
+            return False, f"alt_m {p['alt_m']} is above the {MAX_ALT_M} m limit"
     if action == "goto":
         if "place" in p:
             return False, f"place '{p['place']}' needs the places table (not built yet); use lat/lon"
@@ -73,16 +87,23 @@ def check_command(cmd, validator, home=None):
             d = distance_m(home[0], home[1], p["lat"], p["lon"])
             if d > GEOFENCE_M:
                 return False, (f"target is {d:.0f} m from home, outside the {GEOFENCE_M} m geofence "
-                               "(did you start PX4 with PX4_HOME_LAT/LON?)")
+                               "(is PX4's home where the seed coordinates are, e.g. the Baylands world?)")
     return True, "ok"
 
 
 def command_from_llm(text, url):
     sys.path.insert(0, str(ROOT / "language"))
+    from guard import check_grounding, normalize_units
     from run_llm import command_from_text
-    raw, latency = command_from_text(text, url=url)
+    text2 = normalize_units(text)
+    if text2 != text:
+        print(f"[NORM] {text2}")
+    raw, latency = command_from_text(text2, url=url)
     print(f"[LLM] {latency:.1f}s -> {raw}")
-    return json.loads(raw)
+    cmd, why = check_grounding(json.loads(raw), text2)
+    if why:
+        print(f"[GUARD] changed to clarify: {why}")
+    return cmd
 
 
 async def fly(cmd):
@@ -100,7 +121,21 @@ async def fly(cmd):
         break
     print(f"[SIM] home lat={home.latitude_deg:.6f} lon={home.longitude_deg:.6f} amsl={home.absolute_altitude_m:.1f}")
 
-    ok, reason = check_command(cmd, load_validator(), (home.latitude_deg, home.longitude_deg))
+    validator = load_validator()
+    if cmd["action"] == "move":
+        ok, reason = check_command(cmd, validator)
+        if not ok:
+            print(f"[GATE] refused: {reason}")
+            return 2
+        m = cmd["params"]
+        async for here in drone.telemetry.position():
+            break
+        lat, lon = destination_point(here.latitude_deg, here.longitude_deg, m["bearing_deg"], m["distance_m"])
+        print(f"[MOVE] {m['distance_m']} m at {m['bearing_deg']} deg from {here.latitude_deg:.6f}, "
+              f"{here.longitude_deg:.6f} -> {lat:.6f}, {lon:.6f}")
+        cmd = {"action": "goto", "params": {"lat": round(lat, 6), "lon": round(lon, 6), "alt_m": m["alt_m"]}}
+
+    ok, reason = check_command(cmd, validator, (home.latitude_deg, home.longitude_deg))
     if not ok:
         print(f"[GATE] refused: {reason}")
         return 2

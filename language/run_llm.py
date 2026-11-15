@@ -14,6 +14,7 @@ import time
 import urllib.request
 from pathlib import Path
 
+from guard import check_grounding, normalize_units
 from make_grammar import SCHEMA_PATH, command_validator
 
 HERE = Path(__file__).parent
@@ -22,8 +23,11 @@ GRAMMAR = (HERE / "command.gbnf").read_text()
 VALIDATOR = command_validator(json.loads(SCHEMA_PATH.read_text()))
 
 SYSTEM = """You turn an operator's typed request into exactly one JSON drone command.
-Actions: goto, search_area, loiter, hold, return_home, report_status, clarify.
-Units: whole meters and whole seconds (convert feet and minutes). Altitude is meters above home.
+Actions: goto, search_area, loiter, move, hold, return_home, report_status, clarify.
+Units: whole meters and whole seconds (convert feet, kilometers and minutes). Altitude is meters above home.
+move flies distance_m meters from where the drone is now, in direction bearing_deg (degrees clockwise
+from north: 0 north, 90 east, 180 south, 270 west), at alt_m. It needs all three as numbers. If the
+direction is a word like northeast, or the distance, bearing or altitude is missing, use clarify.
 Location: use a snake_case place name (north_field) when the operator names a place, lat and lon
 when they give coordinates, and for loiter an event_id (E03) when they name an event. Never mix them.
 loiter has no altitude. search_area target is vehicle, person, structure or any.
@@ -62,23 +66,30 @@ def command_from_text(text, url="http://127.0.0.1:8080"):
     return out, time.perf_counter() - t0
 
 
-def run_seeds(url):
+def run_seeds(url, guard=False):
     seeds = [json.loads(l) for l in (ROOT / "data" / "seeds.jsonl").read_text().splitlines()]
     rows = []
     for s in seeds:
-        raw, dt = command_from_text(s["text"], url)
+        text = normalize_units(s["text"]) if guard else s["text"]
+        raw, dt = command_from_text(text, url)
         try:
             cmd = json.loads(raw)
             valid = VALIDATOR.is_valid(cmd)
         except json.JSONDecodeError:
             cmd, valid = None, False
-        rows.append({
+        row = {
             "id": s["id"], "valid": valid, "latency_s": round(dt, 2),
             "action_match": bool(cmd) and cmd.get("action") == s["expected"]["action"],
             "output": raw.strip(),
-        })
+        }
+        if guard:
+            g, why = check_grounding(cmd, text) if cmd else (None, None)
+            row["guarded_output"] = json.dumps(g, separators=(",", ":")) if g else ""
+            row["guard_reason"] = why or ""
+            row["guarded_action_match"] = bool(g) and g.get("action") == s["expected"]["action"]
+        rows.append(row)
         print(f"{s['id']} valid={valid} {dt:5.2f}s {raw.strip()[:90]}")
-    out = HERE / "results_5_5.csv"
+    out = HERE / ("results_guard.csv" if guard else "results_5_5.csv")
     with out.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader()
@@ -87,6 +98,9 @@ def run_seeds(url):
     lat = [r["latency_s"] for r in rows]
     print(f"\nvalid JSON (schema-checked): {sum(r['valid'] for r in rows)}/{n}")
     print(f"action matches seed (informational, not the 6.5 eval): {sum(r['action_match'] for r in rows)}/{n}")
+    if guard:
+        print(f"after guard, action matches seed: {sum(r['guarded_action_match'] for r in rows)}/{n} "
+              f"(guard changed {sum(bool(r['guard_reason']) for r in rows)} commands)")
     print(f"latency s: median {statistics.median(lat):.2f}, max {max(lat):.2f}  (wall clock, incl. HTTP)")
     print(f"wrote {out}")
 
@@ -95,10 +109,11 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("text", nargs="?")
     ap.add_argument("--seeds", action="store_true")
+    ap.add_argument("--guard", action="store_true", help="normalize units first, check values after (guard.py)")
     ap.add_argument("--url", default="http://127.0.0.1:8080")
     a = ap.parse_args()
     if a.seeds:
-        run_seeds(a.url)
+        run_seeds(a.url, a.guard)
     elif a.text:
         print(command_from_text(a.text, a.url)[0])
     else:
