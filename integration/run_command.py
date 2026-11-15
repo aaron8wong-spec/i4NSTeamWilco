@@ -3,8 +3,8 @@
 
 This is a test bridge, not the final R1/R5 code. It proves the contract:
 schema-valid JSON -> safety check -> MAVSDK -> drone moves.
-It handles goto (lat/lon), move, hold and return_home. Other actions are printed and skipped.
-A move is turned into a goto from the drone's current position, then gated like any goto.
+It handles goto (lat/lon), move, climb, descend, hold and return_home. Other actions are printed and skipped.
+A move, climb or descend is turned into a goto from the drone's current position, then gated like any goto.
 
 The seed coordinates are around the Gazebo Baylands world (home 37.412173, -121.998878).
 Start PX4 in that world, or every goto is hundreds of km from home and the gate refuses it
@@ -38,7 +38,7 @@ TAKEOFF_ALT_M = 10
 ARRIVE_HORIZ_M = 3.0
 ARRIVE_VERT_M = 2.0
 GOTO_TIMEOUT_S = 180
-SUPPORTED = {"goto", "move", "hold", "return_home"}
+SUPPORTED = {"goto", "move", "climb", "descend", "hold", "return_home"}
 
 
 def load_validator():
@@ -64,6 +64,14 @@ def destination_point(lat, lon, bearing_deg, dist_m):
     p2 = math.asin(math.sin(p1) * math.cos(dr) + math.cos(p1) * math.sin(dr) * math.cos(th))
     l2 = l1 + math.atan2(math.sin(th) * math.sin(dr) * math.cos(p1), math.cos(dr) - math.sin(p1) * math.sin(p2))
     return math.degrees(p2), (math.degrees(l2) + 540) % 360 - 180
+
+
+def new_altitude(current_alt_m, action, amount_m):
+    """Altitude (whole meters above home) after a climb or descend. Raises ValueError if it would be below 1 m."""
+    alt = round(current_alt_m + (amount_m if action == "climb" else -amount_m))
+    if alt < 1:
+        raise ValueError(f"descending {amount_m} m from {current_alt_m:.0f} m would go below 1 m")
+    return alt
 
 
 def check_command(cmd, validator, home=None):
@@ -134,6 +142,21 @@ async def fly(cmd):
         print(f"[MOVE] {m['distance_m']} m at {m['bearing_deg']} deg from {here.latitude_deg:.6f}, "
               f"{here.longitude_deg:.6f} -> {lat:.6f}, {lon:.6f}")
         cmd = {"action": "goto", "params": {"lat": round(lat, 6), "lon": round(lon, 6), "alt_m": m["alt_m"]}}
+
+    if cmd["action"] in ("climb", "descend"):
+        ok, reason = check_command(cmd, validator)
+        if not ok:
+            print(f"[GATE] refused: {reason}")
+            return 2
+        async for here in drone.telemetry.position():
+            break
+        try:
+            alt = new_altitude(here.relative_altitude_m, cmd["action"], cmd["params"]["amount_m"])
+        except ValueError as e:
+            print(f"[GATE] refused: {e}")
+            return 2
+        print(f"[{cmd['action'].upper()}] {here.relative_altitude_m:.0f} m -> {alt} m over {here.latitude_deg:.6f}, {here.longitude_deg:.6f}")
+        cmd = {"action": "goto", "params": {"lat": round(here.latitude_deg, 6), "lon": round(here.longitude_deg, 6), "alt_m": alt}}
 
     ok, reason = check_command(cmd, validator, (home.latitude_deg, home.longitude_deg))
     if not ok:

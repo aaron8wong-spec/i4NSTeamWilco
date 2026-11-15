@@ -33,6 +33,17 @@ def test_destination_wraps_longitude_at_the_date_line():
     assert -180 <= lon <= 180 and lon < 0
 
 
+def test_climb_and_descend_altitude():
+    assert rc.new_altitude(40, "climb", 61) == 101
+    assert rc.new_altitude(40, "descend", 15) == 25
+    assert rc.new_altitude(40.4, "climb", 10) == 50
+
+
+def test_descend_below_one_meter_is_refused():
+    with pytest.raises(ValueError):
+        rc.new_altitude(10, "descend", 10)
+
+
 V = None
 
 
