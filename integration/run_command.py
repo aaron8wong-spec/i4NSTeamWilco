@@ -5,15 +5,17 @@ This is a test bridge, not the final R1/R5 code. It proves the contract:
 schema-valid JSON -> safety check -> MAVSDK -> drone moves.
 It handles goto (lat/lon), hold and return_home. Other actions are printed and skipped.
 
-Start PX4 with home near the seed coordinates (UCSD), or every goto is thousands of km away:
+The seed coordinates are around the Gazebo Baylands world (home 37.412173, -121.998878).
+Start PX4 in that world, or every goto is hundreds of km from home and the gate refuses it
+(the default world is in Zurich). The script prints "[SIM] home ..." so you can check it:
   cd ~/PX4-Autopilot
-  PX4_HOME_LAT=32.8800 PX4_HOME_LON=-117.2400 PX4_HOME_ALT=100 HEADLESS=1 make px4_sitl gz_x500
+  HEADLESS=1 make px4_sitl gz_x500   # start it in the Baylands world your team uses
 
 Then, from the repo root:
   # A) JSON directly (no model needed)
-  python3 integration/run_command.py '{"action":"goto","params":{"lat":32.8801,"lon":-117.2340,"alt_m":40}}'
+  python3 integration/run_command.py '{"action":"goto","params":{"lat":37.4123,"lon":-121.9925,"alt_m":40}}'
   # B) typed text through the grammar, using a llama-server on another machine
-  python3 integration/run_command.py --text "Fly to 32.8801, -117.2340 at 40 meters." --llm http://<IP>:8080
+  python3 integration/run_command.py --text "Fly to 37.4123, -121.9925 at 40 meters." --llm http://<IP>:8080
   # Check a command without flying (no sim needed)
   python3 integration/run_command.py --dry-run '{"action":"hold","params":{}}'
 """
