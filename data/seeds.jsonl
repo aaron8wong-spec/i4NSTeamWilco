@@ -51,3 +51,7 @@
 {"id": "S51", "text": "Fly 500 meters at 40 meters altitude.", "expected": {"action": "clarify", "params": {"reason": "missing_location", "question": "Which direction should I fly, in degrees?"}}}
 {"id": "S52", "text": "Move 500 meters northeast at 40 meters.", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "What bearing in degrees should I fly?"}}}
 {"id": "S53", "text": "Go 300 m due west at 60 m altitude.", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "What bearing in degrees should I fly?"}}}
+{"id": "S54", "text": "Climb 50 meters.", "expected": {"action": "climb", "params": {"amount_m": 50}}}
+{"id": "S55", "text": "Go up 100 feet.", "expected": {"action": "climb", "params": {"amount_m": 30}}}
+{"id": "S56", "text": "Descend 20 meters.", "expected": {"action": "descend", "params": {"amount_m": 20}}}
+{"id": "S57", "text": "Drop down 30 feet.", "expected": {"action": "descend", "params": {"amount_m": 9}}}

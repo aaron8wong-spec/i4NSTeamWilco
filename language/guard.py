@@ -35,6 +35,7 @@ _SLOTS = [
     ("alt_m", ("alt_m",), "missing_altitude", "How high should I fly?"),
     ("radius_m", ("radius_m",), "ambiguous_reference", "What radius should I use, in meters?"),
     ("duration_s", ("duration_s",), "ambiguous_reference", "For how many seconds?"),
+    ("amount_m", ("amount_m",), "missing_altitude", "By how many meters?"),
 ]
 
 

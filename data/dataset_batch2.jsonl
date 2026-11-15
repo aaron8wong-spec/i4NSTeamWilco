@@ -1,0 +1,12 @@
+{"id": "D103", "tag": "climb", "text": "Climb 80 meters.", "expected": {"action": "climb", "params": {"amount_m": 80}}}
+{"id": "D104", "tag": "climb", "text": "Go up 30 meters.", "expected": {"action": "climb", "params": {"amount_m": 30}}}
+{"id": "D105", "tag": "climb", "text": "Gain 150 feet.", "expected": {"action": "climb", "params": {"amount_m": 46}}}
+{"id": "D106", "tag": "climb", "text": "Rise fifty meters.", "expected": {"action": "climb", "params": {"amount_m": 50}}}
+{"id": "D107", "tag": "climb", "text": "Ascend 100 meters.", "expected": {"action": "climb", "params": {"amount_m": 100}}}
+{"id": "D108", "tag": "descend", "text": "Go down 25 meters.", "expected": {"action": "descend", "params": {"amount_m": 25}}}
+{"id": "D109", "tag": "descend", "text": "Descend 60 feet.", "expected": {"action": "descend", "params": {"amount_m": 18}}}
+{"id": "D110", "tag": "descend", "text": "Lower twenty meters.", "expected": {"action": "descend", "params": {"amount_m": 20}}}
+{"id": "D111", "tag": "descend", "text": "Drop 40 meters.", "expected": {"action": "descend", "params": {"amount_m": 40}}}
+{"id": "D112", "tag": "descend", "text": "Come down 120 feet.", "expected": {"action": "descend", "params": {"amount_m": 37}}}
+{"id": "D113", "tag": "clarify-missing-altitude", "text": "Go up.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How much higher should I go?"}}}
+{"id": "D114", "tag": "clarify-missing-altitude", "text": "Descend a bit.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How many meters should I descend?"}}}

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "i4NS Army-737 MVP schemas",
   "description": "Shared data contracts for the Say Less, Fly More MVP. Command is what the language model emits. Event is what the simulated drone reports. MissionState is the shared mission memory. Rule is one entry in rules.json. OperatorMessage is what the operator hears or sees. Units: metres, seconds, degrees (WGS84). Altitude is metres above the home point. See schemas.md.",
-  "x-schema-version": "1.1.0",
+  "x-schema-version": "1.2.0",
   "$defs": {
     "Lat": {
       "type": "number",
@@ -39,6 +39,12 @@
       "minimum": 1,
       "maximum": 10000,
       "description": "Distance in whole metres to travel from the drone's current position. The range is wide on purpose so the safety gate, not the grammar, decides what is too far and can tell the operator why."
+    },
+    "ChangeM": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Height change in whole metres, up (climb) or down (descend) from the drone's current altitude. The range is wide on purpose so the safety gate, not the grammar, decides what is too much and can tell the operator why."
     },
     "BearingDeg": {
       "type": "integer",
@@ -206,6 +212,40 @@
                 "distance_m": { "$ref": "#/$defs/DistanceM" },
                 "bearing_deg": { "$ref": "#/$defs/BearingDeg" },
                 "alt_m": { "$ref": "#/$defs/AltM" }
+              }
+            }
+          }
+        },
+        {
+          "title": "climb",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "climb" },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["amount_m"],
+              "properties": {
+                "amount_m": { "$ref": "#/$defs/ChangeM" }
+              }
+            }
+          }
+        },
+        {
+          "title": "descend",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "descend" },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["amount_m"],
+              "properties": {
+                "amount_m": { "$ref": "#/$defs/ChangeM" }
               }
             }
           }

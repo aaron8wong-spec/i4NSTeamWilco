@@ -1,4 +1,4 @@
-root ::= cmd-goto | cmd-search-area | cmd-loiter | cmd-move | cmd-hold | cmd-return-home | cmd-report-status | cmd-clarify
+root ::= cmd-goto | cmd-search-area | cmd-loiter | cmd-move | cmd-climb | cmd-descend | cmd-hold | cmd-return-home | cmd-report-status | cmd-clarify
 place ::= "\"" [a-z] [a-z0-9_]{1,31} "\""
 altm ::= ([1-9] | ("1" [0-9] | [2-8] [0-9]{1} | "9" [0-9]) | ("1" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9]) | [2-8] [0-9]{2} | "9" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9])) | ("1" ("0" ("0" [0-0]))))
 lat ::= num
@@ -13,6 +13,9 @@ cmd-loiter ::= "{" ws "\"action\"" ws ":" ws "\"loiter\"" ws "," ws "\"params\""
 distancem ::= ([1-9] | ("1" [0-9] | [2-8] [0-9]{1} | "9" [0-9]) | ("1" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9]) | [2-8] [0-9]{2} | "9" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9])) | ("1" ("0" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9]) | [1-8] [0-9]{2} | "9" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9])) | [2-8] [0-9]{3} | "9" ("0" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9]) | [1-8] [0-9]{2} | "9" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9]))) | ("1" ("0" ("0" ("0" [0-0])))))
 bearingdeg ::= ([0-9] | ("1" [0-9] | [2-8] [0-9]{1} | "9" [0-9]) | ("1" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9]) | [2-2] [0-9]{2} | "3" ("0" [0-9] | [1-4] [0-9]{1} | "5" [0-9])))
 cmd-move ::= "{" ws "\"action\"" ws ":" ws "\"move\"" ws "," ws "\"params\"" ws ":" ws "{" ws "\"distance_m\"" ws ":" ws distancem ws "," ws "\"bearing_deg\"" ws ":" ws bearingdeg ws "," ws "\"alt_m\"" ws ":" ws altm ws "}" ws "}"
+changem ::= ([1-9] | ("1" [0-9] | [2-8] [0-9]{1} | "9" [0-9]) | ("1" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9]) | [2-8] [0-9]{2} | "9" ("0" [0-9] | [1-8] [0-9]{1} | "9" [0-9])) | ("1" ("0" ("0" [0-0]))))
+cmd-climb ::= "{" ws "\"action\"" ws ":" ws "\"climb\"" ws "," ws "\"params\"" ws ":" ws "{" ws "\"amount_m\"" ws ":" ws changem ws "}" ws "}"
+cmd-descend ::= "{" ws "\"action\"" ws ":" ws "\"descend\"" ws "," ws "\"params\"" ws ":" ws "{" ws "\"amount_m\"" ws ":" ws changem ws "}" ws "}"
 cmd-hold ::= "{" ws "\"action\"" ws ":" ws "\"hold\"" ws "," ws "\"params\"" ws ":" ws "{" ws "}" ws "}"
 cmd-return-home ::= "{" ws "\"action\"" ws ":" ws "\"return_home\"" ws "," ws "\"params\"" ws ":" ws "{" ws "}" ws "}"
 cmd-report-status ::= "{" ws "\"action\"" ws ":" ws "\"report_status\"" ws "," ws "\"params\"" ws ":" ws "{" ws "}" ws "}"

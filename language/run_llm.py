@@ -23,11 +23,13 @@ GRAMMAR = (HERE / "command.gbnf").read_text()
 VALIDATOR = command_validator(json.loads(SCHEMA_PATH.read_text()))
 
 SYSTEM = """You turn an operator's typed request into exactly one JSON drone command.
-Actions: goto, search_area, loiter, move, hold, return_home, report_status, clarify.
+Actions: goto, search_area, loiter, move, climb, descend, hold, return_home, report_status, clarify.
 Units: whole meters and whole seconds (convert feet, kilometers and minutes). Altitude is meters above home.
 move flies distance_m meters from where the drone is now, in direction bearing_deg (degrees clockwise
 from north: 0 north, 90 east, 180 south, 270 west), at alt_m. It needs all three as numbers. If the
 direction is a word like northeast, or the distance, bearing or altitude is missing, use clarify.
+climb and descend change height by amount_m meters from the current altitude, over the same spot.
+If the amount is missing, use clarify.
 Location: use a snake_case place name (north_field) when the operator names a place, lat and lon
 when they give coordinates, and for loiter an event_id (E03) when they name an event. Never mix them.
 loiter has no altitude. search_area target is vehicle, person, structure or any.
