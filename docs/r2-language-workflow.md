@@ -10,7 +10,7 @@ The operator types (later: says) a request. We want one JSON command out, every 
 typed text -> llama.cpp (LLM) + grammar -> JSON command -> safety gate -> flight
 ```
 
-The design rule from `CLAUDE.md`: **the LLM suggests, plain code decides.** The model only picks one of seven fixed commands. It never talks to the drone. A safety gate (R1's job, `safety.py`) checks every command before anything moves.
+The design rule from `CLAUDE.md`: **the LLM suggests, plain code decides.** The model only picks one of ten fixed commands. It never talks to the drone. A safety gate (R1's job, `safety.py`) checks every command before anything moves.
 
 Two different guarantees matter here, and it helps to keep them apart:
 
@@ -26,7 +26,7 @@ The grammar protects the **format**. It does not protect the **meaning**.
 ### 2.1 `integration/schemas.json` (the source of truth)
 A JSON Schema that describes every legal command: `goto`, `search_area`, `loiter`, `hold`, `return_home`, `report_status`, `clarify`. The command shapes live under `$defs/Command`. Each has a fixed `action` name and a fixed set of `params`.
 
-This is R5's frozen v1.0.0 file (see `docs/schemas.md`). A schema change needs a team vote, then a version bump, then a grammar rebuild, new seeds and a re-run of the eval.
+This is R5's frozen schema file (now v1.2.0) (see `docs/schemas.md`). A schema change needs a team vote, then a version bump, then a grammar rebuild, new seeds and a re-run of the eval.
 
 The schema checks shape only (types, required fields, lat in -90..90). Limits like the 120 m max altitude belong to the safety gate.
 
@@ -37,7 +37,7 @@ Reads the schema and writes `language/command.gbnf`. GBNF is llama.cpp's grammar
 {"action":"hold","params":{}}
 ```
 
-with small gaps of whitespace allowed. The root rule says the output must match one of the seven command rules.
+with small gaps of whitespace allowed. The root rule says the output must match one of the ten command rules.
 
 Why generate it instead of writing it by hand? So the schema stays the single source of truth. Change the schema, rerun the script, and the grammar follows. The script refuses schema features it does not understand, so it cannot quietly build a wrong grammar. A test (`test_grammar_matches_committed_file`) fails if `command.gbnf` is out of date.
 
@@ -48,7 +48,7 @@ Why generate it instead of writing it by hand? So the schema stays the single so
 
 ### 2.4 `language/run_llm.py` (the wrapper)
 For each request it builds a prompt and sends it to `llama-server`:
-1. A **system prompt**: what the seven actions are, the units, and when to answer `clarify`.
+1. A **system prompt**: what the ten actions are, the units, and when to answer `clarify`.
 2. The user's text.
 3. Llama's chat format markers (`<|start_header_id|>` and so on) so the model knows who is speaking.
 4. The **grammar**, in the request's `grammar` field.

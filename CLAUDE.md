@@ -1,5 +1,5 @@
 i4NS Army-737 "Say Less, Fly More": Team Context for AI Assistants
-Last updated: week 6 (2026-11-09). Schemas frozen at v1.0.0 (team vote done). Paste this whole document into your AI tool, then tell it: "I am role R_ (name the role). My current task is _." The AI should then work from this document and ask before breaking any rule in section 9.
+Last updated: week 6 (2026-11-09); schema section updated 2026-11-14 for v1.2.0. Schemas frozen at v1.2.0 (v1.0.0 team vote done; the v1.1.0 and v1.2.0 relative-move additions still need the vote recorded in the group channel). Paste this whole document into your AI tool, then tell it: "I am role R_ (name the role). My current task is _." The AI should then work from this document and ask before breaking any rule in section 9.
 
 0. Instructions to the AI assistant reading this
 You are helping one member of a five-person university team build a 10-week MVP of a sponsor challenge. Use this document as the source of truth.
@@ -77,23 +77,26 @@ Honest limits we must state in every presentation:
 Perception is simulated. Events are scripted, not detected by vision.
 Results are from a simulator, not real flights.
 Accuracy numbers come from our own synthetic data.
-5. Schemas (FROZEN v1.0.0)
+5. Schemas (FROZEN v1.2.0)
 Source of truth: integration/schemas.json (JSON Schema). Explanation and examples: docs/schemas.md. Both were frozen after the team vote. Any change needs a team vote, a version bump, a grammar rebuild (python3 language/make_grammar.py), updated seeds and a re-run of the accuracy eval. If this section and schemas.json disagree, schemas.json wins; fix this section.
 Units: meters, seconds, WGS84 lat/lon. Altitude is meters above home. Names carry the unit: alt_m, radius_m, duration_s, time_s. Distances and times in commands are whole numbers.
-Command (the only things the language model may output). One JSON object, "action" first, then "params". Seven actions:
+Command (the only things the language model may output). One JSON object, "action" first, then "params". Ten actions:
 {"action": "goto", "params": {"place": "north_field", "alt_m": 40}}
 {"action": "search_area", "params": {"place": "north_field", "radius_m": 150, "alt_m": 50, "target": "vehicle"}}
 {"action": "loiter", "params": {"event_id": "E03", "radius_m": 30, "duration_s": 120}}
+{"action": "move", "params": {"distance_m": 500, "bearing_deg": 45, "alt_m": 40}}
+{"action": "climb", "params": {"amount_m": 61}}
+{"action": "descend", "params": {"amount_m": 20}}
 {"action": "hold", "params": {}}
 {"action": "return_home", "params": {}}
 {"action": "report_status", "params": {}}
 {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How high should I fly?"}}
 
 Location in goto, search_area and loiter is given one way, never mixed: a place name, or lat plus lon, or (loiter only) an event_id. The model should prefer place and use lat/lon only when the operator states coordinates.
-search_area target is one of vehicle, person, structure, any. loiter has no altitude (it keeps the current one). report_status reads out what was found since the last report (the summarize list).
+search_area target is one of vehicle, person, structure, any. loiter has no altitude (it keeps the current one). move goes distance_m from the drone's current position on bearing_deg (whole degrees clockwise from true north, 0 to 359) at alt_m, which is required. Compass words ("northeast") are not accepted: the model uses clarify. climb and descend change height by amount_m from the current altitude, over the same spot (two actions, because the grammar cannot write negative numbers). report_status reads out what was found since the last report (the summarize list).
 clarify reason is one of missing_location, missing_altitude, ambiguous_reference, unsupported_action, unsafe_request, unclear_speech. Use clarify for vague, impossible or unsafe requests. Do not guess a value.
 Ranges in the schema are outer bounds so the grammar can keep the model inside them. They are not safety limits. The safety gate applies the real limits and refuses with a reason (alt_m 800 is valid JSON the gate can refuse).
-Not in v1.0.0 (adding any is a schema change): multi-step commands (a list of commands), relative moves ("up 200 feet"), "follow me", and anything involving weapons or engagement.
+Not in v1.2.0 (adding any is a schema change): multi-step commands (a list of commands), compass-word moves ("10 m north"), setting an absolute altitude without a place, "follow me", and anything involving weapons or engagement.
 Places: a place name must be resolved to lat/lon by code from a places table. A name not in the table is refused with a reason (it is not a model failure). The table does not exist yet. We will build it from the simulation world once the sim scenario looks right. Owner to be decided.
 Event (what the simulated drone "sees"):
 {"id": "E03", "type": "vehicle", "confidence": 0.79, "lat": 32.8821, "lon": -117.2384, "time_s": 142.5, "people_visible": 2, "subtype": "truck"}
