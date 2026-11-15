@@ -1,0 +1,23 @@
+{"id": "D002", "tag": "goto-coords", "text": "Navigate to latitude 37.4105 longitude -121.9965, altitude 55 meters.", "expected": {"action": "goto", "params": {"lat": 37.4105, "lon": -121.9965, "alt_m": 55}}}
+{"id": "D009", "tag": "goto-coords", "text": "Fly to 37.4125 -122.0015 at 45m.", "expected": {"action": "goto", "params": {"lat": 37.4125, "lon": -122.0015, "alt_m": 45}}}
+{"id": "D013", "tag": "goto-place", "text": "Take the drone to the south bridge at 35 meters.", "expected": {"action": "goto", "params": {"place": "south_bridge", "alt_m": 35}}}
+{"id": "D018", "tag": "goto-place", "text": "Fly to the west road at 70 meters.", "expected": {"action": "goto", "params": {"place": "west_road", "alt_m": 70}}}
+{"id": "D021", "tag": "search-place", "text": "Check the south bridge for structures, radius 100 meters, altitude 40.", "expected": {"action": "search_area", "params": {"place": "south_bridge", "radius_m": 100, "alt_m": 40, "target": "structure"}}}
+{"id": "D024", "tag": "search-place", "text": "Find people near the tree line, radius 250 meters, at 70 meters.", "expected": {"action": "search_area", "params": {"place": "tree_line", "radius_m": 250, "alt_m": 70, "target": "person"}}}
+{"id": "D027", "tag": "search-coords", "text": "Search for vehicles around 37.4120, -122.0000 with a 100 meter radius at 50 meters.", "expected": {"action": "search_area", "params": {"lat": 37.412, "lon": -122.0, "radius_m": 100, "alt_m": 50, "target": "vehicle"}}}
+{"id": "D033", "tag": "loiter-event", "text": "Loiter at E07, radius 40 meters, for 2 minutes.", "expected": {"action": "loiter", "params": {"event_id": "E07", "radius_m": 40, "duration_s": 120}}}
+{"id": "D041", "tag": "loiter-place", "text": "Orbit the south bridge, radius 100 meters, for 15 minutes.", "expected": {"action": "loiter", "params": {"place": "south_bridge", "radius_m": 100, "duration_s": 900}}}
+{"id": "D043", "tag": "loiter-coords", "text": "Loiter at 37.4138, -121.9975 for 3 minutes, radius 35 meters.", "expected": {"action": "loiter", "params": {"lat": 37.4138, "lon": -121.9975, "radius_m": 35, "duration_s": 180}}}
+{"id": "D048", "tag": "move", "text": "Fly 750 m on bearing 180 at 60 m.", "expected": {"action": "move", "params": {"distance_m": 750, "bearing_deg": 180, "alt_m": 60}}}
+{"id": "D049", "tag": "move", "text": "Go 200 meters heading 315 at 30 meters.", "expected": {"action": "move", "params": {"distance_m": 200, "bearing_deg": 315, "alt_m": 30}}}
+{"id": "D063", "tag": "hold", "text": "Pause the mission and hover.", "expected": {"action": "hold", "params": {}}}
+{"id": "D067", "tag": "return-home", "text": "Go back to where you took off.", "expected": {"action": "return_home", "params": {}}}
+{"id": "D073", "tag": "report-status", "text": "Report status.", "expected": {"action": "report_status", "params": {}}}
+{"id": "D077", "tag": "clarify-missing-altitude", "text": "Move 300 meters at 90 degrees.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How high should I fly?"}}}
+{"id": "D082", "tag": "clarify-missing-location", "text": "Go 250 meters, 60 meters up.", "expected": {"action": "clarify", "params": {"reason": "missing_location", "question": "Which direction should I fly, in degrees?"}}}
+{"id": "D085", "tag": "clarify-ambiguous", "text": "Loiter over it for two minutes.", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "What should I loiter over?"}}}
+{"id": "D089", "tag": "clarify-unsafe", "text": "Go to the north field at 5000 feet.", "expected": {"action": "clarify", "params": {"reason": "unsafe_request", "question": "That is too high. What altitude do you want?"}}}
+{"id": "D096", "tag": "clarify-unsupported", "text": "Follow me.", "expected": {"action": "clarify", "params": {"reason": "unsupported_action", "question": "I can't follow you. Where should I go?"}}}
+{"id": "D101", "tag": "clarify-unclear-speech", "text": "Blah, to the, you know, whatever.", "expected": {"action": "clarify", "params": {"reason": "unclear_speech", "question": "I didn't catch that. Can you repeat it?"}}}
+{"id": "D103", "tag": "climb", "text": "Climb 80 meters.", "expected": {"action": "climb", "params": {"amount_m": 80}}}
+{"id": "D110", "tag": "descend", "text": "Lower twenty meters.", "expected": {"action": "descend", "params": {"amount_m": 20}}}
