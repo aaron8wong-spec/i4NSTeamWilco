@@ -25,7 +25,7 @@ Version: 1.1.0. Schemas are frozen. A change needs a team vote, then a version b
 
 ## Command
 
-A command is one JSON object: `{"action": "<name>", "params": {...}}`. Eight actions.
+A command is one JSON object: `{"action": "<name>", "params": {...}}`. Ten actions.
 
 | Action | Params | Meaning |
 |---|---|---|
@@ -33,6 +33,8 @@ A command is one JSON object: `{"action": "<name>", "params": {...}}`. Eight act
 | `search_area` | location, `radius_m`, `alt_m`, `target` | Sweep a circle for a target type. Sets `target` and `area` in mission state. |
 | `loiter` | location, `radius_m`, `duration_s` | Circle a point, then hold. Altitude stays as it is. |
 | `move` | `distance_m`, `bearing_deg`, `alt_m` | Fly a distance in a direction from the drone's current position, then stop. Not a place or coordinates. |
+| `climb` | `amount_m` | Go up by a number of metres from the current altitude, staying over the same spot. |
+| `descend` | `amount_m` | Go down by a number of metres from the current altitude, staying over the same spot. |
 | `hold` | none | Stop and hold position. |
 | `return_home` | none | Fly to the home point and land. |
 | `report_status` | none | Read out what has been found since the last report (the summarize list). |
@@ -43,6 +45,8 @@ Location is `place` or `lat` + `lon`. For `loiter` it can also be `event_id`.
 `target` is one of `vehicle`, `person`, `structure`, `any`.
 
 `move` is relative to where the drone is when the command runs. `bearing_deg` is whole degrees clockwise from true north (0 north, 90 east, 180 south, 270 west). `distance_m` is whole metres. `alt_m` is required and is metres above home, as for `goto`. Compass words such as "northeast" are not accepted: the model answers `clarify` with `ambiguous_reference` and asks for degrees. Code works out the destination from the live position, and the safety gate checks it against the geofence around home.
+
+`climb` and `descend` change height only. `amount_m` is whole metres (feet are converted to metres). Code adds or subtracts it from the live altitude, and the safety gate checks the result against the altitude limits. The up or down is the action, not a negative number.
 
 `clarify.reason` is one of `missing_location`, `missing_altitude`, `ambiguous_reference`, `unsupported_action`, `unsafe_request`, `unclear_speech`. `question` is one short question, up to 160 characters.
 
@@ -64,6 +68,14 @@ Examples:
 
 ```json command
 {"action": "move", "params": {"distance_m": 500, "bearing_deg": 45, "alt_m": 40}}
+```
+
+```json command
+{"action": "climb", "params": {"amount_m": 61}}
+```
+
+```json command
+{"action": "descend", "params": {"amount_m": 20}}
 ```
 
 ```json command
@@ -95,7 +107,8 @@ The language model only suggests a command. Plain code decides.
 
 These came up in interviews or in testing and are deliberately left out of the MVP. Adding any of them is a schema change.
 
-- Vertical or compass-word relative moves such as "go up 200 feet" or "10 m north". (`move` in 1.1.0 covers only distance plus a bearing in degrees.)
+- Compass-word relative moves such as "10 m north". (`move` covers distance plus a bearing in degrees; `climb` and `descend` cover up and down.)
+- Setting an absolute altitude without a place ("go to 80 meters"). `goto` needs a location.
 - "Follow me".
 - Multi-step missions as a list of commands. One request maps to one command for now.
 - Weapons or engagement of any kind. Positive identification and engagement stay with the human.
@@ -213,12 +226,13 @@ The scorer (R4) owns matching, tie-breaking and deduplication. This file only fi
 
 ### 1.1.0
 
-Adds relative moves. Needs the team vote recorded before tagging.
+Adds relative moves, horizontal and vertical. Needs the team vote recorded before tagging.
 
 - Adds the `move` action: `distance_m`, `bearing_deg`, `alt_m`. Relative to the drone's current position. `alt_m` is required.
 - Adds the `DistanceM` (1 to 10000 m) and `BearingDeg` (0 to 359) definitions. The ranges are outer bounds; the safety gate applies the real limits.
+- Adds `climb` and `descend`: `amount_m` only, from the current altitude. Two actions because the grammar cannot write negative numbers. Adds the `ChangeM` definition (1 to 1000 m).
 - Compass words are not accepted. The model answers `clarify` with `ambiguous_reference`. No new `clarify` reason was added.
-- Seeds S41 to S53 added (9 `move`, 4 `clarify`). The accuracy eval must be re-run, because earlier numbers no longer apply.
+- Seeds S41 to S57 added (9 `move`, 4 `clarify`, 2 `climb`, 2 `descend`). The accuracy eval must be re-run, because earlier numbers no longer apply.
 
 ### 1.0.0
 

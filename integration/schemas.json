@@ -40,6 +40,12 @@
       "maximum": 10000,
       "description": "Distance in whole metres to travel from the drone's current position. The range is wide on purpose so the safety gate, not the grammar, decides what is too far and can tell the operator why."
     },
+    "ChangeM": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Height change in whole metres, up (climb) or down (descend) from the drone's current altitude. The range is wide on purpose so the safety gate, not the grammar, decides what is too much and can tell the operator why."
+    },
     "BearingDeg": {
       "type": "integer",
       "minimum": 0,
@@ -206,6 +212,40 @@
                 "distance_m": { "$ref": "#/$defs/DistanceM" },
                 "bearing_deg": { "$ref": "#/$defs/BearingDeg" },
                 "alt_m": { "$ref": "#/$defs/AltM" }
+              }
+            }
+          }
+        },
+        {
+          "title": "climb",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "climb" },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["amount_m"],
+              "properties": {
+                "amount_m": { "$ref": "#/$defs/ChangeM" }
+              }
+            }
+          }
+        },
+        {
+          "title": "descend",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action", "params"],
+          "properties": {
+            "action": { "const": "descend" },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["amount_m"],
+              "properties": {
+                "amount_m": { "$ref": "#/$defs/ChangeM" }
               }
             }
           }
