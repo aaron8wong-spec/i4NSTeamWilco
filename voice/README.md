@@ -51,7 +51,7 @@ For newer versions, follow the Quick start in https://github.com/ggml-org/whispe
 | Hardware | Apple M1, 8 GB RAM | Laptop, default threads |
 | Audio format | 16 kHz, mono, 16-bit PCM WAV | `-ar 16000 -ac 1 -c:a pcm_s16le`; whisper-cli needs 16-bit WAV |
 | Output | `-otxt -of transcripts/<clip>` | Plain text, no timestamps |
-| Noise added | pink noise, amplitude 0.05, 16 kHz | ffmpeg `anoisesrc`; mixed as `____` |
+| Noise added | pink noise, amplitude 0.05, 16 kHz | ffmpeg `anoisesrc` |
 | Other decoding settings | whisper-cli defaults | No language, beam, temperature or thread flags set |
  
 ## How to reproduce
