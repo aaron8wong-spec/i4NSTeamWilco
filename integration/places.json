@@ -1,0 +1,27 @@
+{
+  "_note": "World origin from baylands.sdf (ENU). lat/lon computed with WGS84 degree lengths (110985.4 m per degree of latitude, 88528.9 m per degree of longitude at this latitude). Each point was flown to in SITL by Lane S (arrived within 3 m). The names 'buildings' and 'bridge' are NOT confirmed by eye: the map only shows tall geometry, which could be terrain. Check in the Gazebo view.",
+  "north_field": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "north_m": 200,
+    "east_m": 240,
+    "verified_flown": true,
+    "seen_in_view": false
+  },
+  "buildings": {
+    "lat": 37.412894,
+    "lon": -121.997071,
+    "north_m": 80,
+    "east_m": 160,
+    "verified_flown": true,
+    "seen_in_view": false
+  },
+  "bridge": {
+    "lat": 37.414696,
+    "lon": -121.998427,
+    "north_m": 280,
+    "east_m": 40,
+    "verified_flown": true,
+    "seen_in_view": false
+  }
+}
