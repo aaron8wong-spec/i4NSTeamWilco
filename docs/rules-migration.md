@@ -45,7 +45,7 @@ After D1 several rules tied. Fix: one rule per situation, and let scorer step 4 
 
 Removed: R02 (into R01), R06 (into R05), R11 (into R10), R08 and R14 (low-priority catch-alls that could never win). 10 rules remain. Ids are not renumbered, so old logs still make sense.
 
-Tie-break (scorer must implement): take the highest priority. Among equal priority, take the rule with the most condition keys. Then the highest `min_confidence`. Then the lowest id. Example: a vehicle with 3 people matches R01 and R04. R04 wins (more specific, safety relevant).
+Tie-break (scorer must implement): take the highest priority. Among equal priority, take the rule with the most condition keys. Then the larger `people_visible_min` (so R04 beats R01 for 3 people). Then the highest `min_confidence`. Then the lowest id. Example: a vehicle with 3 people matches R01 and R04. R04 wins (more specific, safety relevant).
 
 Known change in behavior: a person or unknown object with very low confidence (below 0.3) used to be logged. Now it asks. Check this against the labeled events (M5) and the interviews before deciding if it is noise.
 
