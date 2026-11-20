@@ -1,0 +1,12 @@
+{
+  "geofence_radius_m": 1500,
+  "max_alt_m": 120,
+  "min_alt_m": 1,
+  "battery_floor_pct": 25,
+  "lost_link_hold_s": 10,
+  "detection_range_m": 60,
+  "search_spacing_m": 60,
+  "confidence_noise_sigma": 0.05,
+  "arrive_horiz_m": 3.0,
+  "arrive_vert_m": 2.0
+}
