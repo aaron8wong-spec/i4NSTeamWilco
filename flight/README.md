@@ -27,4 +27,7 @@
   - Dispatches automated arm and takeoff to hover.
   - Enters offboard mode and routes to relative NED target ([10.0m, 10.0m, -5.0m]).
   - Achieved position tolerance gate: Err: 0.50m <= 0.5m.
-  - Disengages offboard mode, touches down, and disarms cleanly.nano flight/README.md
+  - Disengages offboard mode, touches down, and disarms cleanly.
+
+## Task 6.1 (Safety Gate)
+- `flight/safety.py`: Enforces schema validity, manual mode refusal, 20% battery cutoff, 120 m altitude ceiling, 1 m floor, and 1500 m geofence (22/22 unit tests passing in `flight/test_safety.py`).
