@@ -52,10 +52,53 @@ TEMPLATE = (
 )
 
 
-def command_from_text(text, url="http://127.0.0.1:8080"):
+# Added to the system prompt only when a mission_state is passed (task 7.4). Without one, the prompt
+# is exactly the old prompt.
+FOLLOWUP_RULES = """
+The operator may answer a question you asked. The mission context below the request says what is pending.
+If there is a pending question and the operator agrees (yes, ok, do it, affirmative, loiter there), output the proposed command exactly as given.
+If the operator only declines (no, negative, don't, keep searching), output clarify with reason ambiguous_reference. Nothing is flown, and the search goes on.
+If the operator gives a different command, output that command and ignore the question.
+Go back or return means return_home. A bare yes or no with no pending question is clarify with reason ambiguous_reference.
+Higher or lower with no amount in meters is clarify with reason missing_altitude."""
+
+USER_WITH_CONTEXT = "Mission context:\n{context}\n\nRequest: {text}"
+
+
+def context_block(ms):
+    """Short plain-text summary of a mission_state dict for the prompt. Reads only; keeps no copy."""
+    pq = ms.get("pending_question")
+    lines = []
+    if pq:
+        lines.append(f"Pending question: {pq['text']}")
+        lines.append("Proposed command if the operator agrees: "
+                     + json.dumps(pq["proposed_command"], separators=(",", ":")))
+    else:
+        lines.append("Pending question: none")
+    lines.append(f"Target: {ms.get('target') or 'none'}")
+    a = ms.get("area")
+    lines.append("Search area: " + (f"lat {a['lat']}, lon {a['lon']}, radius_m {a['radius_m']}, alt_m {a['alt_m']}"
+                                    if a else "none"))
+    lines.append("Already reported: " + (", ".join(ms.get("already_reported") or []) or "none"))
+    return "\n".join(lines)
+
+
+def build_prompt(text, mission_state=None):
+    """Full prompt. mission_state=None gives the same bytes as before task 7.4."""
+    if mission_state is None:
+        return TEMPLATE.format(system=SYSTEM, text=text)
+    user = USER_WITH_CONTEXT.format(context=context_block(mission_state), text=text)
+    return (
+        "<|start_header_id|>system<|end_header_id|>\n\n" + SYSTEM + FOLLOWUP_RULES + "<|eot_id|>"
+        "<|start_header_id|>user<|end_header_id|>\n\n" + user + "<|eot_id|>"
+        "<|start_header_id|>assistant<|end_header_id|>\n\n"
+    )
+
+
+def command_from_text(text, url="http://127.0.0.1:8080", mission_state=None):
     """Return (raw_output, latency_s). The grammar forces valid JSON."""
     body = json.dumps({
-        "prompt": TEMPLATE.format(system=SYSTEM, text=text),
+        "prompt": build_prompt(text, mission_state),
         "grammar": GRAMMAR,
         "temperature": 0,
         "n_predict": 300,
