@@ -1,3 +1,6 @@
-# Agent entry point
+# Gemini CLI entry point
 
-Read CLAUDE.md in this folder first. Follow its START HERE section. Then read docs/contracts.md and docs/work-plan.md.
+The full team instructions are in CLAUDE.md. They are imported below, so they load automatically.
+After they load, follow the START HERE section at the top, then read docs/contracts.md and docs/work-plan.md.
+
+@./CLAUDE.md
