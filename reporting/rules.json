@@ -1,17 +1,114 @@
-{"rules": [
-  {"id": "R01", "event_type": "vehicle", "condition": {"people_visible_min": 1}, "priority": "high", "min_confidence": 0.6, "action": "interrupt", "reason": "Person inside a vehicle. Recommend a closer look.", "safety_relevant": false},
-  {"id": "R02", "event_type": "vehicle", "condition": {"people_visible_min": 1}, "priority": "high", "min_confidence": 0.0, "action": "ask", "reason": "Possible person inside a vehicle, but I'm not sure. Want me to check?", "safety_relevant": false},
-  {"id": "R03", "event_type": "vehicle", "condition": {}, "priority": "medium", "min_confidence": 0.0, "action": "summarize", "reason": "Empty vehicle. Added to the search report.", "safety_relevant": false},
-  {"id": "R04", "event_type": "vehicle", "condition": {"people_visible_min": 3}, "priority": "high", "min_confidence": 0.6, "action": "interrupt", "reason": "Vehicle with three or more people. Reported for squad safety.", "safety_relevant": true},
-  {"id": "R05", "event_type": "person", "condition": {}, "priority": "high", "min_confidence": 0.7, "action": "interrupt", "reason": "Person in the search area.", "safety_relevant": false},
-  {"id": "R06", "event_type": "person", "condition": {}, "priority": "high", "min_confidence": 0.0, "action": "ask", "reason": "Possible person, but I'm not sure. Want me to check?", "safety_relevant": false},
-  {"id": "R07", "event_type": "person", "condition": {"people_visible_min": 3}, "priority": "high", "min_confidence": 0.3, "action": "interrupt", "reason": "Group of three or more people. Reported for squad safety.", "safety_relevant": true},
-  {"id": "R08", "event_type": "person", "condition": {}, "priority": "low", "min_confidence": 0.0, "action": "log", "reason": "Very low-confidence person detection. Logged only.", "safety_relevant": false},
-  {"id": "R09", "event_type": "structure", "condition": {}, "priority": "medium", "min_confidence": 0.0, "action": "summarize", "reason": "Building in the search area. Added to the search report.", "safety_relevant": false},
-  {"id": "R10", "event_type": "structure", "condition": {"people_visible_min": 1}, "priority": "high", "min_confidence": 0.6, "action": "interrupt", "reason": "People at a building. Recommend a closer look.", "safety_relevant": false},
-  {"id": "R11", "event_type": "structure", "condition": {"people_visible_min": 1}, "priority": "high", "min_confidence": 0.0, "action": "ask", "reason": "Possible people at a building, but I'm not sure. Want me to check?", "safety_relevant": false},
-  {"id": "R12", "event_type": "unknown", "condition": {}, "priority": "high", "min_confidence": 0.0, "action": "ask", "reason": "Unidentified object. Want me to take a closer look?", "safety_relevant": true},
-  {"id": "R13", "event_type": "unknown", "condition": {"people_visible_min": 1}, "priority": "high", "min_confidence": 0.3, "action": "interrupt", "reason": "Unidentified object with people nearby. Recommend a closer look.", "safety_relevant": true},
-  {"id": "R14", "event_type": "unknown", "condition": {}, "priority": "low", "min_confidence": 0.0, "action": "log", "reason": "Very low-confidence unidentified object. Logged only.", "safety_relevant": false},
-  {"id": "R15", "event_type": "wildlife", "condition": {}, "priority": "low", "min_confidence": 0.0, "action": "log", "reason": "Wildlife is not a mission target.", "safety_relevant": false}
-]}
+{
+  "rules": [
+    {
+      "id": "R01",
+      "event_type": "vehicle",
+      "condition": {
+        "people_visible_min": 1
+      },
+      "priority": "high",
+      "min_confidence": 0.6,
+      "action": "interrupt",
+      "reason": "Person inside a vehicle. Recommend a closer look.",
+      "safety_relevant": false
+    },
+    {
+      "id": "R03",
+      "event_type": "vehicle",
+      "condition": {},
+      "priority": "medium",
+      "min_confidence": 0.0,
+      "action": "summarize",
+      "reason": "Empty vehicle. Added to the search report.",
+      "safety_relevant": false
+    },
+    {
+      "id": "R04",
+      "event_type": "vehicle",
+      "condition": {
+        "people_visible_min": 3
+      },
+      "priority": "high",
+      "min_confidence": 0.6,
+      "action": "interrupt",
+      "reason": "Vehicle with three or more people. Reported for squad safety.",
+      "safety_relevant": true
+    },
+    {
+      "id": "R05",
+      "event_type": "person",
+      "condition": {},
+      "priority": "high",
+      "min_confidence": 0.7,
+      "action": "interrupt",
+      "reason": "Person in the search area.",
+      "safety_relevant": false
+    },
+    {
+      "id": "R07",
+      "event_type": "person",
+      "condition": {
+        "people_visible_min": 3
+      },
+      "priority": "high",
+      "min_confidence": 0.3,
+      "action": "interrupt",
+      "reason": "Group of three or more people. Reported for squad safety.",
+      "safety_relevant": true
+    },
+    {
+      "id": "R09",
+      "event_type": "structure",
+      "condition": {},
+      "priority": "medium",
+      "min_confidence": 0.0,
+      "action": "summarize",
+      "reason": "Building in the search area. Added to the search report.",
+      "safety_relevant": false
+    },
+    {
+      "id": "R10",
+      "event_type": "structure",
+      "condition": {
+        "people_visible_min": 1
+      },
+      "priority": "high",
+      "min_confidence": 0.6,
+      "action": "interrupt",
+      "reason": "People at a building. Recommend a closer look.",
+      "safety_relevant": false
+    },
+    {
+      "id": "R12",
+      "event_type": "unknown",
+      "condition": {},
+      "priority": "high",
+      "min_confidence": 0.0,
+      "action": "ask",
+      "reason": "Unidentified object. Want me to take a closer look?",
+      "safety_relevant": true
+    },
+    {
+      "id": "R13",
+      "event_type": "unknown",
+      "condition": {
+        "people_visible_min": 1
+      },
+      "priority": "high",
+      "min_confidence": 0.3,
+      "action": "interrupt",
+      "reason": "Unidentified object with people nearby. Recommend a closer look.",
+      "safety_relevant": true
+    },
+    {
+      "id": "R15",
+      "event_type": "wildlife",
+      "condition": {},
+      "priority": "low",
+      "min_confidence": 0.0,
+      "action": "log",
+      "reason": "Wildlife is not a mission target.",
+      "safety_relevant": false
+    }
+  ]
+}
