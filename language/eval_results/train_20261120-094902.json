@@ -1,0 +1,47 @@
+{
+  "split": "train",
+  "time": "20261120-094902",
+  "model_summary": {
+    "n": 212,
+    "action_acc": 0.7405660377358491,
+    "param_acc": 0.6412213740458015,
+    "exact_acc": 0.4669811320754717,
+    "clarify_recall": 0.4262295081967213,
+    "clarify_reason_acc": 0.5769230769230769,
+    "false_ask_rate": 0.059602649006622516,
+    "would_fly_wrong": 93,
+    "climb_descend_swaps": 6,
+    "outcomes": {
+      "exact": 99,
+      "wrong_params": 47,
+      "wrong_action": 11,
+      "false_ask": 9,
+      "invented_command": 35,
+      "wrong_reason": 11
+    }
+  },
+  "guarded_summary": {
+    "n": 212,
+    "action_acc": 0.6792452830188679,
+    "param_acc": 1.0,
+    "exact_acc": 0.5283018867924528,
+    "clarify_recall": 0.9836065573770492,
+    "clarify_reason_acc": 0.4666666666666667,
+    "false_ask_rate": 0.40397350993377484,
+    "would_fly_wrong": 7,
+    "climb_descend_swaps": 6,
+    "outcomes": {
+      "exact": 112,
+      "false_ask": 61,
+      "wrong_reason": 32,
+      "wrong_action": 6,
+      "invented_command": 1
+    }
+  },
+  "latency": {
+    "median": 4.345661917002872,
+    "p90": 6.0913234578911215,
+    "max": 9.20713495905511
+  },
+  "normalize_input": true
+}

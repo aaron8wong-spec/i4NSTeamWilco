@@ -1,0 +1,741 @@
+[
+ {
+  "event": {
+   "id": "E01",
+   "type": "wildlife",
+   "confidence": 0.9,
+   "lat": 37.414245,
+   "lon": -121.996958,
+   "time_s": 25.0,
+   "people_visible": 0,
+   "subtype": "deer"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "log",
+  "frozen": false,
+  "why": "Demo event. A deer is not a mission target and not a threat. Do not bother the operator."
+ },
+ {
+  "event": {
+   "id": "E02",
+   "type": "vehicle",
+   "confidence": 0.85,
+   "lat": 37.413795,
+   "lon": -121.996281,
+   "time_s": 30.0,
+   "people_visible": 0,
+   "subtype": "truck"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "summarize",
+  "frozen": false,
+  "why": "Demo event. Empty truck is the target but nobody is at risk. Hold for the report."
+ },
+ {
+  "event": {
+   "id": "E03",
+   "type": "vehicle",
+   "confidence": 0.82,
+   "lat": 37.413975,
+   "lon": -121.995377,
+   "time_s": 35.0,
+   "people_visible": 2,
+   "subtype": "truck"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "interrupt",
+  "frozen": true,
+  "why": "Demo event. Truck with two people: operator wants to know now."
+ },
+ {
+  "event": {
+   "id": "E04",
+   "type": "unknown",
+   "confidence": 0.4,
+   "lat": 37.41429,
+   "lon": -121.995998,
+   "time_s": 40.0,
+   "people_visible": 0
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "ask",
+  "frozen": false,
+  "why": "Demo event. Unidentified blob at low confidence: the drone should ask before spending time on it."
+ },
+ {
+  "event": {
+   "id": "E05",
+   "type": "vehicle",
+   "confidence": 0.9,
+   "lat": 37.414065,
+   "lon": -121.995942,
+   "time_s": 45.0,
+   "people_visible": 3,
+   "subtype": "truck"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "interrupt",
+  "frozen": false,
+  "why": "Three people at a vehicle, high confidence: squad safety, tell the operator now."
+ },
+ {
+  "event": {
+   "id": "E06",
+   "type": "vehicle",
+   "confidence": 0.45,
+   "lat": 37.413885,
+   "lon": -121.996055,
+   "time_s": 50.0,
+   "people_visible": 1,
+   "subtype": "sedan"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "ask",
+  "frozen": true,
+  "why": "Possible person in a vehicle but the detector is unsure. Confirm before diverting."
+ },
+ {
+  "event": {
+   "id": "E07",
+   "type": "vehicle",
+   "confidence": 0.95,
+   "lat": 37.41402,
+   "lon": -121.99645,
+   "time_s": 55.0,
+   "people_visible": 1,
+   "subtype": "sedan"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "interrupt",
+  "frozen": false,
+  "why": "One person in a vehicle, very sure. Interrupt."
+ },
+ {
+  "event": {
+   "id": "E08",
+   "type": "person",
+   "confidence": 0.9,
+   "lat": 37.413525,
+   "lon": -121.99662,
+   "time_s": 60.0,
+   "people_visible": 1
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "interrupt",
+  "frozen": false,
+  "why": "Person on foot while searching for vehicles. Unexpected and relevant: an operator would want to hear it now."
+ },
+ {
+  "event": {
+   "id": "E09",
+   "type": "person",
+   "confidence": 0.9,
+   "lat": 37.413615,
+   "lon": -121.996281,
+   "time_s": 65.0,
+   "people_visible": 1
+  },
+  "state_hint": {
+   "target": "person",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "interrupt",
+  "frozen": true,
+  "why": "Person is the mission target and the detector is sure."
+ },
+ {
+  "event": {
+   "id": "E10",
+   "type": "person",
+   "confidence": 0.35,
+   "lat": 37.413705,
+   "lon": -121.996168,
+   "time_s": 70.0,
+   "people_visible": 1
+  },
+  "state_hint": {
+   "target": "person",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "ask",
+  "frozen": false,
+  "why": "Target person but a weak detection. Ask before loitering."
+ },
+ {
+  "event": {
+   "id": "E11",
+   "type": "person",
+   "confidence": 0.5,
+   "lat": 37.41411,
+   "lon": -121.99549,
+   "time_s": 75.0,
+   "people_visible": 4
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "interrupt",
+  "frozen": true,
+  "why": "Group of four people, even at moderate confidence, is a squad safety issue."
+ },
+ {
+  "event": {
+   "id": "E12",
+   "type": "person",
+   "confidence": 0.2,
+   "lat": 37.413434,
+   "lon": -121.995942,
+   "time_s": 80.0,
+   "people_visible": 1
+  },
+  "state_hint": {
+   "target": "any",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "log",
+  "frozen": false,
+  "why": "Very weak person detection (0.20) is more likely noise. Do not ask the operator about it."
+ },
+ {
+  "event": {
+   "id": "E13",
+   "type": "structure",
+   "confidence": 0.8,
+   "lat": 37.414426,
+   "lon": -121.996168,
+   "time_s": 85.0,
+   "people_visible": 0
+  },
+  "state_hint": {
+   "target": "structure",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "summarize",
+  "frozen": true,
+  "why": "Building is the target, nobody around. Goes in the report."
+ },
+ {
+  "event": {
+   "id": "E14",
+   "type": "structure",
+   "confidence": 0.8,
+   "lat": 37.414516,
+   "lon": -121.996281,
+   "time_s": 90.0,
+   "people_visible": 0
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "log",
+  "frozen": false,
+  "why": "Building while searching for vehicles, nobody around. Not needed."
+ },
+ {
+  "event": {
+   "id": "E15",
+   "type": "structure",
+   "confidence": 0.75,
+   "lat": 37.414471,
+   "lon": -121.996111,
+   "time_s": 95.0,
+   "people_visible": 2
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "interrupt",
+  "frozen": true,
+  "why": "People at a building, good confidence. Worth an interrupt even though the target is vehicles."
+ },
+ {
+  "event": {
+   "id": "E16",
+   "type": "structure",
+   "confidence": 0.4,
+   "lat": 37.414381,
+   "lon": -121.996055,
+   "time_s": 100.0,
+   "people_visible": 1
+  },
+  "state_hint": {
+   "target": "structure",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "ask",
+  "frozen": true,
+  "why": "Possible person at the target building but weak. Ask first."
+ },
+ {
+  "event": {
+   "id": "E17",
+   "type": "wildlife",
+   "confidence": 0.95,
+   "lat": 37.413254,
+   "lon": -121.996845,
+   "time_s": 105.0,
+   "people_visible": 0,
+   "subtype": "deer"
+  },
+  "state_hint": {
+   "target": "any",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "log",
+  "frozen": false,
+  "why": "Wildlife, not a concern."
+ },
+ {
+  "event": {
+   "id": "E18",
+   "type": "wildlife",
+   "confidence": 0.3,
+   "lat": 37.413344,
+   "lon": -121.996733,
+   "time_s": 110.0,
+   "people_visible": 0,
+   "subtype": "hog"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "log",
+  "frozen": true,
+  "why": "Weak wildlife detection. Log."
+ },
+ {
+  "event": {
+   "id": "E19",
+   "type": "unknown",
+   "confidence": 0.7,
+   "lat": 37.4142,
+   "lon": -121.996224,
+   "time_s": 115.0,
+   "people_visible": 1
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "interrupt",
+  "frozen": false,
+  "why": "Unidentified object with a person nearby at decent confidence: tell the operator."
+ },
+ {
+  "event": {
+   "id": "E20",
+   "type": "unknown",
+   "confidence": 0.9,
+   "lat": 37.414245,
+   "lon": -121.996111,
+   "time_s": 120.0,
+   "people_visible": 0
+  },
+  "state_hint": {
+   "target": "person",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "ask",
+  "frozen": true,
+  "why": "Unidentified object, even if clearly there, is not safe to ignore. Ask whether to look closer."
+ },
+ {
+  "event": {
+   "id": "E21",
+   "type": "unknown",
+   "confidence": 0.2,
+   "lat": 37.41384,
+   "lon": -121.996563,
+   "time_s": 125.0,
+   "people_visible": 0
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "log",
+  "frozen": false,
+  "why": "Very weak blob (0.20) with no people. Too faint to ask about."
+ },
+ {
+  "event": {
+   "id": "E22",
+   "type": "vehicle",
+   "confidence": 0.82,
+   "lat": 37.413975,
+   "lon": -121.995377,
+   "time_s": 130.0,
+   "people_visible": 2,
+   "subtype": "truck"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [
+    "E22"
+   ],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "log",
+  "frozen": true,
+  "why": "Same event fired again (id already reported). Do not repeat the alert."
+ },
+ {
+  "event": {
+   "id": "E23",
+   "type": "vehicle",
+   "confidence": 0.8,
+   "lat": 37.413804,
+   "lon": -121.996269,
+   "time_s": 135.0,
+   "people_visible": 0,
+   "subtype": "truck"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   },
+   "reported_events": [
+    {
+     "type": "vehicle",
+     "lat": 37.413795,
+     "lon": -121.996281
+    }
+   ]
+  },
+  "label": "log",
+  "frozen": false,
+  "why": "A second sighting of the empty truck about 1.5 m from the first. Same object, do not repeat."
+ },
+ {
+  "event": {
+   "id": "E24",
+   "type": "vehicle",
+   "confidence": 0.3,
+   "lat": 37.41375,
+   "lon": -121.996337,
+   "time_s": 140.0,
+   "people_visible": 0,
+   "subtype": "truck"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "log",
+  "frozen": true,
+  "why": "Barely detected empty vehicle. Not worth a report line."
+ },
+ {
+  "event": {
+   "id": "E25",
+   "type": "vehicle",
+   "confidence": 0.6,
+   "lat": 37.41393,
+   "lon": -121.995716,
+   "time_s": 145.0,
+   "people_visible": 2,
+   "subtype": "van"
+  },
+  "state_hint": {
+   "target": "vehicle",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "interrupt",
+  "frozen": false,
+  "why": "Two people at a vehicle, confidence right at the rule threshold. Interrupt."
+ },
+ {
+  "event": {
+   "id": "E26",
+   "type": "vehicle",
+   "confidence": 0.55,
+   "lat": 37.41402,
+   "lon": -121.995603,
+   "time_s": 150.0,
+   "people_visible": 5,
+   "subtype": "bus"
+  },
+  "state_hint": {
+   "target": "person",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "ask",
+  "frozen": true,
+  "why": "Large group in a vehicle, detection a little weak. Operator should be asked, not interrupted."
+ },
+ {
+  "event": {
+   "id": "E27",
+   "type": "person",
+   "confidence": 0.8,
+   "lat": 37.413525,
+   "lon": -121.996055,
+   "time_s": 155.0,
+   "people_visible": 1
+  },
+  "state_hint": {
+   "target": null,
+   "already_reported": []
+  },
+  "label": "interrupt",
+  "frozen": false,
+  "why": "No target set yet. A confident person is still worth an interrupt."
+ },
+ {
+  "event": {
+   "id": "E28",
+   "type": "vehicle",
+   "confidence": 0.9,
+   "lat": 37.413705,
+   "lon": -121.996224,
+   "time_s": 160.0,
+   "people_visible": 0,
+   "subtype": "truck"
+  },
+  "state_hint": {
+   "target": "person",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "log",
+  "frozen": true,
+  "why": "Empty vehicle while searching for people. Not needed."
+ },
+ {
+  "event": {
+   "id": "E29",
+   "type": "vehicle",
+   "confidence": 0.7,
+   "lat": 37.413885,
+   "lon": -121.996111,
+   "time_s": 165.0,
+   "people_visible": 0,
+   "subtype": "truck"
+  },
+  "state_hint": {
+   "target": "any",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "summarize",
+  "frozen": true,
+  "why": "Empty vehicle, target any. Hold for the report."
+ },
+ {
+  "event": {
+   "id": "E30",
+   "type": "vehicle",
+   "confidence": 0.7,
+   "lat": 37.413957,
+   "lon": -121.996077,
+   "time_s": 170.0,
+   "people_visible": 1,
+   "subtype": "jeep"
+  },
+  "state_hint": {
+   "target": "structure",
+   "already_reported": [],
+   "area": {
+    "lat": 37.413975,
+    "lon": -121.996168,
+    "radius_m": 150,
+    "alt_m": 50
+   }
+  },
+  "label": "summarize",
+  "frozen": true,
+  "why": "Vehicle with a person while searching for structures. Operator would want it in the report, not an interrupt."
+ }
+]

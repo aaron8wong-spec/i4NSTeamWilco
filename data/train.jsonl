@@ -89,3 +89,124 @@
 {"id": "D112", "tag": "descend", "text": "Come down 120 feet.", "expected": {"action": "descend", "params": {"amount_m": 37}}}
 {"id": "D113", "tag": "clarify-missing-altitude", "text": "Go up.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How much higher should I go?"}}}
 {"id": "D114", "tag": "clarify-missing-altitude", "text": "Descend a bit.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How many meters should I descend?"}}}
+{"id": "D115", "tag": "goto-place", "text": "Go to the bridge at 45 meters.", "expected": {"action": "goto", "params": {"place": "bridge", "alt_m": 45}}}
+{"id": "D116", "tag": "goto-place", "text": "Fly to the buildings at 30 meters.", "expected": {"action": "goto", "params": {"place": "buildings", "alt_m": 30}}}
+{"id": "D117", "tag": "goto-place", "text": "Take the drone to the north field, 60 meters up.", "expected": {"action": "goto", "params": {"place": "north_field", "alt_m": 60}}}
+{"id": "D118", "tag": "goto-place", "text": "Head over to the bridge at 100 feet.", "expected": {"action": "goto", "params": {"place": "bridge", "alt_m": 30}}}
+{"id": "D119", "tag": "goto-place", "text": "Move to the buildings at 200 feet altitude.", "expected": {"action": "goto", "params": {"place": "buildings", "alt_m": 61}}}
+{"id": "D120", "tag": "goto-place", "text": "Fly over the north field at 250 feet.", "expected": {"action": "goto", "params": {"place": "north_field", "alt_m": 76}}}
+{"id": "D121", "tag": "goto-place", "text": "Go to the bridge, seventy meters.", "expected": {"action": "goto", "params": {"place": "bridge", "alt_m": 70}}}
+{"id": "D122", "tag": "goto-place", "text": "Fly to the buildings at forty meters.", "expected": {"action": "goto", "params": {"place": "buildings", "alt_m": 40}}}
+{"id": "D123", "tag": "goto-place", "text": "Proceed to the north field at fifty-five meters.", "expected": {"action": "goto", "params": {"place": "north_field", "alt_m": 55}}}
+{"id": "D124", "tag": "goto-place", "text": "Get over to the bridge at one hundred meters.", "expected": {"action": "goto", "params": {"place": "bridge", "alt_m": 100}}}
+{"id": "D125", "tag": "goto-place", "text": "Head to the buildings and stay at 35 meters.", "expected": {"action": "goto", "params": {"place": "buildings", "alt_m": 35}}}
+{"id": "D127", "tag": "goto-place", "text": "uh go to the bridge at um sixty meters", "expected": {"action": "goto", "params": {"place": "bridge", "alt_m": 60}}}
+{"id": "D128", "tag": "goto-place", "text": "okay fly to the buildings at 50 meters", "expected": {"action": "goto", "params": {"place": "buildings", "alt_m": 50}}}
+{"id": "D130", "tag": "goto-place", "text": "Bridge, 25 meters, fly there now.", "expected": {"action": "goto", "params": {"place": "bridge", "alt_m": 25}}}
+{"id": "D132", "tag": "goto-place", "text": "Navigate to the north field at 120 feet.", "expected": {"action": "goto", "params": {"place": "north_field", "alt_m": 37}}}
+{"id": "D133", "tag": "goto-place", "text": "Go on over to the bridge at 15 meters.", "expected": {"action": "goto", "params": {"place": "bridge", "alt_m": 15}}}
+{"id": "D134", "tag": "goto-place", "text": "Take us to the buildings at three hundred feet.", "expected": {"action": "goto", "params": {"place": "buildings", "alt_m": 91}}}
+{"id": "D136", "tag": "goto-place", "text": "Position the drone over the bridge at 65 meters.", "expected": {"action": "goto", "params": {"place": "bridge", "alt_m": 65}}}
+{"id": "D137", "tag": "search-place", "text": "Search the bridge for vehicles, 100 meter radius, at 50 meters.", "expected": {"action": "search_area", "params": {"place": "bridge", "radius_m": 100, "alt_m": 50, "target": "vehicle"}}}
+{"id": "D139", "tag": "search-place", "text": "Scan the north field for anything, 200 meter radius at 60 meters.", "expected": {"action": "search_area", "params": {"place": "north_field", "radius_m": 200, "alt_m": 60, "target": "any"}}}
+{"id": "D140", "tag": "search-place", "text": "Look for trucks around the bridge, radius 150 meters, altitude 45.", "expected": {"action": "search_area", "params": {"place": "bridge", "radius_m": 150, "alt_m": 45, "target": "vehicle"}}}
+{"id": "D141", "tag": "search-place", "text": "Check the buildings for structures, 120 meter radius, 55 meters high.", "expected": {"action": "search_area", "params": {"place": "buildings", "radius_m": 120, "alt_m": 55, "target": "structure"}}}
+{"id": "D143", "tag": "search-place", "text": "Search the bridge for vehicles, 300 feet radius, 150 feet up.", "expected": {"action": "search_area", "params": {"place": "bridge", "radius_m": 91, "alt_m": 46, "target": "vehicle"}}}
+{"id": "D145", "tag": "search-place", "text": "Look over the north field for personnel, 500 feet radius at 250 feet.", "expected": {"action": "search_area", "params": {"place": "north_field", "radius_m": 152, "alt_m": 76, "target": "person"}}}
+{"id": "D146", "tag": "search-place", "text": "Search the north field for vehicles, one hundred fifty meter radius, fifty meters up.", "expected": {"action": "search_area", "params": {"place": "north_field", "radius_m": 150, "alt_m": 50, "target": "vehicle"}}}
+{"id": "D147", "tag": "search-place", "text": "Scan the bridge for people, ninety meter radius, at thirty-five meters.", "expected": {"action": "search_area", "params": {"place": "bridge", "radius_m": 90, "alt_m": 35, "target": "person"}}}
+{"id": "D148", "tag": "search-place", "text": "Find vehicles near the buildings, two hundred meter radius, sixty meters altitude.", "expected": {"action": "search_area", "params": {"place": "buildings", "radius_m": 200, "alt_m": 60, "target": "vehicle"}}}
+{"id": "D149", "tag": "search-place", "text": "uh search the bridge for any vehicles um 100 meter radius at 40 meters", "expected": {"action": "search_area", "params": {"place": "bridge", "radius_m": 100, "alt_m": 40, "target": "vehicle"}}}
+{"id": "D150", "tag": "search-place", "text": "search the buildings for anyone radius 60 meters altitude 30 meters", "expected": {"action": "search_area", "params": {"place": "buildings", "radius_m": 60, "alt_m": 30, "target": "person"}}}
+{"id": "D152", "tag": "search-place", "text": "Look for buildings or other structures around the bridge, 140 meter radius, at 65 meters.", "expected": {"action": "search_area", "params": {"place": "bridge", "radius_m": 140, "alt_m": 65, "target": "structure"}}}
+{"id": "D153", "tag": "search-place", "text": "Survey the north field for structures, radius 90 meters, 45 meters altitude.", "expected": {"action": "search_area", "params": {"place": "north_field", "radius_m": 90, "alt_m": 45, "target": "structure"}}}
+{"id": "D154", "tag": "search-place", "text": "Search the buildings for trucks, 75 meter radius, 35 meters up.", "expected": {"action": "search_area", "params": {"place": "buildings", "radius_m": 75, "alt_m": 35, "target": "vehicle"}}}
+{"id": "D155", "tag": "search-place", "text": "Hunt for people around the bridge, 110 meters radius, at 50 meters.", "expected": {"action": "search_area", "params": {"place": "bridge", "radius_m": 110, "alt_m": 50, "target": "person"}}}
+{"id": "D156", "tag": "search-place", "text": "Search the north field for vehicles, a 2 kilometer radius, at 100 meters.", "expected": {"action": "search_area", "params": {"place": "north_field", "radius_m": 2000, "alt_m": 100, "target": "vehicle"}}}
+{"id": "D157", "tag": "search-place", "text": "Comb the buildings for anything at all, 50 meter radius, 25 meters altitude.", "expected": {"action": "search_area", "params": {"place": "buildings", "radius_m": 50, "alt_m": 25, "target": "any"}}}
+{"id": "D158", "tag": "search-place", "text": "Search the bridge for vehicles, 1.5 kilometers radius, at 90 meters.", "expected": {"action": "search_area", "params": {"place": "bridge", "radius_m": 1500, "alt_m": 90, "target": "vehicle"}}}
+{"id": "D159", "tag": "loiter-place", "text": "Loiter over the bridge, radius 40 meters, for 2 minutes.", "expected": {"action": "loiter", "params": {"place": "bridge", "radius_m": 40, "duration_s": 120}}}
+{"id": "D160", "tag": "loiter-place", "text": "Circle the north field for 90 seconds with a 50 meter radius.", "expected": {"action": "loiter", "params": {"place": "north_field", "radius_m": 50, "duration_s": 90}}}
+{"id": "D161", "tag": "loiter-place", "text": "Orbit the buildings, 30 meter radius, three minutes.", "expected": {"action": "loiter", "params": {"place": "buildings", "radius_m": 30, "duration_s": 180}}}
+{"id": "D162", "tag": "loiter-place", "text": "Stay over the bridge for five minutes, radius 60 meters.", "expected": {"action": "loiter", "params": {"place": "bridge", "radius_m": 60, "duration_s": 300}}}
+{"id": "D163", "tag": "loiter-place", "text": "Loiter at the north field for ten minutes, radius 100 meters.", "expected": {"action": "loiter", "params": {"place": "north_field", "radius_m": 100, "duration_s": 600}}}
+{"id": "D165", "tag": "goto-coords", "text": "Fly to 37.4135, -121.9990 at 55 meters.", "expected": {"action": "goto", "params": {"lat": 37.4135, "lon": -121.999, "alt_m": 55}}}
+{"id": "D166", "tag": "goto-coords", "text": "Go to latitude 37.4142 longitude -121.9971 at 150 feet.", "expected": {"action": "goto", "params": {"lat": 37.4142, "lon": -121.9971, "alt_m": 46}}}
+{"id": "D168", "tag": "goto-coords", "text": "go to 37.4128 -121.9984 at 45 meters", "expected": {"action": "goto", "params": {"lat": 37.4128, "lon": -121.9984, "alt_m": 45}}}
+{"id": "D169", "tag": "search-coords", "text": "Search 37.4139, -121.9975 for vehicles, 100 meter radius, at 50 meters.", "expected": {"action": "search_area", "params": {"lat": 37.4139, "lon": -121.9975, "radius_m": 100, "alt_m": 50, "target": "vehicle"}}}
+{"id": "D170", "tag": "search-coords", "text": "Look for people around 37.4112, -122.0003, radius 80 meters, 40 meters up.", "expected": {"action": "search_area", "params": {"lat": 37.4112, "lon": -122.0003, "radius_m": 80, "alt_m": 40, "target": "person"}}}
+{"id": "D171", "tag": "search-coords", "text": "Scan 37.4150 -121.9960 for anything, 300 feet radius, 200 feet altitude.", "expected": {"action": "search_area", "params": {"lat": 37.415, "lon": -121.996, "radius_m": 91, "alt_m": 61, "target": "any"}}}
+{"id": "D173", "tag": "loiter-event", "text": "Circle E14 for 45 seconds, 20 meter radius.", "expected": {"action": "loiter", "params": {"event_id": "E14", "radius_m": 20, "duration_s": 45}}}
+{"id": "D174", "tag": "loiter-event", "text": "Orbit E08 for four minutes with a 40 meter radius.", "expected": {"action": "loiter", "params": {"event_id": "E08", "radius_m": 40, "duration_s": 240}}}
+{"id": "D175", "tag": "loiter-event", "text": "Stay on E11, 100 foot radius, for one minute.", "expected": {"action": "loiter", "params": {"event_id": "E11", "radius_m": 30, "duration_s": 60}}}
+{"id": "D176", "tag": "loiter-event", "text": "yes loiter over E03 radius 30 meters two minutes", "expected": {"action": "loiter", "params": {"event_id": "E03", "radius_m": 30, "duration_s": 120}}}
+{"id": "D177", "tag": "loiter-event", "text": "Hold a circle at E17, radius 55 meters, for 15 minutes.", "expected": {"action": "loiter", "params": {"event_id": "E17", "radius_m": 55, "duration_s": 900}}}
+{"id": "D178", "tag": "move", "text": "Move 300 meters at bearing 45 at 50 meters.", "expected": {"action": "move", "params": {"distance_m": 300, "bearing_deg": 45, "alt_m": 50}}}
+{"id": "D180", "tag": "move", "text": "Go 2 kilometers on a heading of 270 at 120 meters.", "expected": {"action": "move", "params": {"distance_m": 2000, "bearing_deg": 270, "alt_m": 120}}}
+{"id": "D181", "tag": "move", "text": "Advance two hundred meters at 180 degrees, sixty meters up.", "expected": {"action": "move", "params": {"distance_m": 200, "bearing_deg": 180, "alt_m": 60}}}
+{"id": "D183", "tag": "move", "text": "go 500 meters at 135 degrees at 40 meters", "expected": {"action": "move", "params": {"distance_m": 500, "bearing_deg": 135, "alt_m": 40}}}
+{"id": "D184", "tag": "move", "text": "Head 1.2 kilometers at 60 degrees at 80 meters.", "expected": {"action": "move", "params": {"distance_m": 1200, "bearing_deg": 60, "alt_m": 80}}}
+{"id": "D185", "tag": "move", "text": "Move three hundred fifty meters at one hundred twenty degrees, 45 meters altitude.", "expected": {"action": "move", "params": {"distance_m": 350, "bearing_deg": 120, "alt_m": 45}}}
+{"id": "D186", "tag": "move", "text": "Fly 150 meters at 0 degrees, altitude 30 meters.", "expected": {"action": "move", "params": {"distance_m": 150, "bearing_deg": 0, "alt_m": 30}}}
+{"id": "D187", "tag": "move", "text": "uh move 600 meters um bearing 225 at 55 meters", "expected": {"action": "move", "params": {"distance_m": 600, "bearing_deg": 225, "alt_m": 55}}}
+{"id": "D188", "tag": "climb", "text": "Climb 55 meters.", "expected": {"action": "climb", "params": {"amount_m": 55}}}
+{"id": "D189", "tag": "climb", "text": "Go up 120 feet.", "expected": {"action": "climb", "params": {"amount_m": 37}}}
+{"id": "D190", "tag": "climb", "text": "Gain twenty meters of altitude.", "expected": {"action": "climb", "params": {"amount_m": 20}}}
+{"id": "D192", "tag": "climb", "text": "go up thirty meters please", "expected": {"action": "climb", "params": {"amount_m": 30}}}
+{"id": "D193", "tag": "climb", "text": "Climb 250 feet.", "expected": {"action": "climb", "params": {"amount_m": 76}}}
+{"id": "D194", "tag": "climb", "text": "Ascend 15 meters.", "expected": {"action": "climb", "params": {"amount_m": 15}}}
+{"id": "D195", "tag": "descend", "text": "Descend 30 meters.", "expected": {"action": "descend", "params": {"amount_m": 30}}}
+{"id": "D197", "tag": "descend", "text": "Drop twenty-five meters.", "expected": {"action": "descend", "params": {"amount_m": 25}}}
+{"id": "D198", "tag": "descend", "text": "Lower yourself by 10 meters.", "expected": {"action": "descend", "params": {"amount_m": 10}}}
+{"id": "D199", "tag": "descend", "text": "go down forty meters", "expected": {"action": "descend", "params": {"amount_m": 40}}}
+{"id": "D200", "tag": "descend", "text": "Descend 150 feet.", "expected": {"action": "descend", "params": {"amount_m": 46}}}
+{"id": "D201", "tag": "descend", "text": "Lose 35 meters of altitude.", "expected": {"action": "descend", "params": {"amount_m": 35}}}
+{"id": "D202", "tag": "hold", "text": "Hold your position now.", "expected": {"action": "hold", "params": {}}}
+{"id": "D203", "tag": "hold", "text": "Stop and hold where you are.", "expected": {"action": "hold", "params": {}}}
+{"id": "D204", "tag": "hold", "text": "Freeze right there.", "expected": {"action": "hold", "params": {}}}
+{"id": "D205", "tag": "hold", "text": "hold hold hold", "expected": {"action": "hold", "params": {}}}
+{"id": "D207", "tag": "return-home", "text": "Return home now.", "expected": {"action": "return_home", "params": {}}}
+{"id": "D208", "tag": "return-home", "text": "Come back to the base.", "expected": {"action": "return_home", "params": {}}}
+{"id": "D210", "tag": "return-home", "text": "okay head back home now", "expected": {"action": "return_home", "params": {}}}
+{"id": "D211", "tag": "return-home", "text": "Return to launch point.", "expected": {"action": "return_home", "params": {}}}
+{"id": "D212", "tag": "report-status", "text": "Give me a quick status report.", "expected": {"action": "report_status", "params": {}}}
+{"id": "D214", "tag": "report-status", "text": "Anything new since the last report?", "expected": {"action": "report_status", "params": {}}}
+{"id": "D215", "tag": "report-status", "text": "um what did you find", "expected": {"action": "report_status", "params": {}}}
+{"id": "D216", "tag": "report-status", "text": "Summarize what you have found.", "expected": {"action": "report_status", "params": {}}}
+{"id": "D217", "tag": "clarify-missing-altitude", "text": "Climb.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How much should I climb?"}}}
+{"id": "D218", "tag": "clarify-missing-altitude", "text": "Descend.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How many meters should I descend?"}}}
+{"id": "D219", "tag": "clarify-missing-altitude", "text": "Go to the bridge.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How high should I fly?"}}}
+{"id": "D220", "tag": "clarify-missing-altitude", "text": "Fly to the buildings please.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How high should I fly?"}}}
+{"id": "D221", "tag": "clarify-missing-altitude", "text": "Search the north field for vehicles, 150 meter radius.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "At what altitude should I search?"}}}
+{"id": "D222", "tag": "clarify-missing-altitude", "text": "Search of the bridge for people, 80 meter radius.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "At what altitude should I search?"}}}
+{"id": "D225", "tag": "clarify-missing-altitude", "text": "Move 400 meters at bearing 90.", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How high should I fly?"}}}
+{"id": "D226", "tag": "clarify-missing-altitude", "text": "uh go to the north field", "expected": {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How high should I fly?"}}}
+{"id": "D227", "tag": "clarify-missing-location", "text": "Search for people at 60 meters, 100 meter radius.", "expected": {"action": "clarify", "params": {"reason": "missing_location", "question": "Where should I search?"}}}
+{"id": "D228", "tag": "clarify-missing-location", "text": "Loiter for 90 seconds, radius 30 meters.", "expected": {"action": "clarify", "params": {"reason": "missing_location", "question": "Where should I loiter?"}}}
+{"id": "D229", "tag": "clarify-missing-location", "text": "Fly at 70 meters.", "expected": {"action": "clarify", "params": {"reason": "missing_location", "question": "Where should I go?"}}}
+{"id": "D230", "tag": "clarify-missing-location", "text": "Go 300 meters at 50 meters altitude.", "expected": {"action": "clarify", "params": {"reason": "missing_location", "question": "Which direction should I fly, in degrees?"}}}
+{"id": "D232", "tag": "clarify-missing-location", "text": "Orbit for two minutes, 40 meter radius.", "expected": {"action": "clarify", "params": {"reason": "missing_location", "question": "Where should I circle?"}}}
+{"id": "D233", "tag": "clarify-missing-location", "text": "Move at bearing 90 at 40 meters.", "expected": {"action": "clarify", "params": {"reason": "missing_location", "question": "How far should I fly, in meters?"}}}
+{"id": "D234", "tag": "clarify-ambiguous", "text": "Fly northeast 500 meters at 40 meters.", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "What bearing in degrees should I fly?"}}}
+{"id": "D235", "tag": "clarify-ambiguous", "text": "Move 200 meters west at 50 meters.", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "What bearing in degrees should I fly?"}}}
+{"id": "D237", "tag": "clarify-ambiguous", "text": "Go over there at 40 meters.", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "Where do you mean?"}}}
+{"id": "D239", "tag": "clarify-ambiguous", "text": "Fly back to where we were before at 50 meters.", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "Which place do you mean?"}}}
+{"id": "D240", "tag": "clarify-ambiguous", "text": "Loiter over that truck for a minute.", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "Which event should I loiter over?"}}}
+{"id": "D241", "tag": "clarify-ambiguous", "text": "Go to the thing by the water at 60 meters.", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "Which place do you mean?"}}}
+{"id": "D242", "tag": "clarify-ambiguous", "text": "uh go southeast like four hundred meters at 50 meters", "expected": {"action": "clarify", "params": {"reason": "ambiguous_reference", "question": "What bearing in degrees should I fly?"}}}
+{"id": "D243", "tag": "clarify-unsafe", "text": "Go to the bridge at 3000 feet.", "expected": {"action": "clarify", "params": {"reason": "unsafe_request", "question": "That is too high. What altitude do you want?"}}}
+{"id": "D245", "tag": "clarify-unsafe", "text": "Fly into the buildings.", "expected": {"action": "clarify", "params": {"reason": "unsafe_request", "question": "That is unsafe. Where should I fly instead?"}}}
+{"id": "D246", "tag": "clarify-unsafe", "text": "Ignore the battery warning and keep searching.", "expected": {"action": "clarify", "params": {"reason": "unsafe_request", "question": "I have to return when the battery is low. Do you want me to return home?"}}}
+{"id": "D247", "tag": "clarify-unsafe", "text": "Fly 2 meters over the people at the bridge.", "expected": {"action": "clarify", "params": {"reason": "unsafe_request", "question": "That is unsafe. What altitude do you want?"}}}
+{"id": "D248", "tag": "clarify-unsafe", "text": "Disable the return home failsafe.", "expected": {"action": "clarify", "params": {"reason": "unsafe_request", "question": "I can't turn off safety limits. What do you want me to do?"}}}
+{"id": "D249", "tag": "clarify-unsafe", "text": "Go to the north field at 2000 meters.", "expected": {"action": "clarify", "params": {"reason": "unsafe_request", "question": "That is too high. What altitude do you want?"}}}
+{"id": "D250", "tag": "clarify-unsupported", "text": "Take a picture of the bridge.", "expected": {"action": "clarify", "params": {"reason": "unsupported_action", "question": "I can't take photos. Do you want me to go there?"}}}
+{"id": "D252", "tag": "clarify-unsupported", "text": "Land here.", "expected": {"action": "clarify", "params": {"reason": "unsupported_action", "question": "I can't land in place. Do you want me to return home?"}}}
+{"id": "D253", "tag": "clarify-unsupported", "text": "Zoom the camera in on the buildings.", "expected": {"action": "clarify", "params": {"reason": "unsupported_action", "question": "I can't control the camera. Do you want me to go there?"}}}
+{"id": "D254", "tag": "clarify-unsupported", "text": "Fly a figure eight over the north field.", "expected": {"action": "clarify", "params": {"reason": "unsupported_action", "question": "I can't fly that pattern. Do you want me to circle it?"}}}
+{"id": "D255", "tag": "clarify-unsupported", "text": "Radio the base and tell them we are done.", "expected": {"action": "clarify", "params": {"reason": "unsupported_action", "question": "I can't send radio calls. Do you want me to return home?"}}}
+{"id": "D256", "tag": "clarify-unclear-speech", "text": "[static] fly [noise] the uh.", "expected": {"action": "clarify", "params": {"reason": "unclear_speech", "question": "I didn't catch that. Can you repeat it?"}}}
+{"id": "D257", "tag": "clarify-unclear-speech", "text": "Mm go to the, the, krrk meters.", "expected": {"action": "clarify", "params": {"reason": "unclear_speech", "question": "I didn't catch that. Can you repeat it?"}}}
+{"id": "D258", "tag": "clarify-unclear-speech", "text": "Uh uh the thing um.", "expected": {"action": "clarify", "params": {"reason": "unclear_speech", "question": "I didn't catch that. Can you repeat it?"}}}
+{"id": "D259", "tag": "clarify-unclear-speech", "text": "[inaudible] [inaudible].", "expected": {"action": "clarify", "params": {"reason": "unclear_speech", "question": "I didn't catch that. Can you repeat it?"}}}
+{"id": "D260", "tag": "clarify-unclear-speech", "text": "Fly, um, [crosstalk] the, yeah.", "expected": {"action": "clarify", "params": {"reason": "unclear_speech", "question": "I didn't catch that. Can you repeat it?"}}}

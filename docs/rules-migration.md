@@ -38,3 +38,15 @@ Several rules can now match one event with the same priority:
 - unknown: R12 always; R13 if people; R14 (low, loses).
 
 Their actions differ (interrupt vs ask) so which one wins changes the tier. This migration does not decide that. The tie-break rule belongs in R4's scoring spec (open question already listed in CLAUDE.md section 6). Until then, results from rules in the tables above are order-dependent.
+
+## Round 2: merge confidence pairs (2026-11-20)
+
+After D1 several rules tied. Fix: one rule per situation, and let scorer step 4 turn "high priority, confidence below `min_confidence`" into `ask`. So an interrupt rule and an ask rule that only differed by confidence are one rule now.
+
+Removed: R02 (into R01), R06 (into R05), R11 (into R10), R08 and R14 (low-priority catch-alls that could never win). 10 rules remain. Ids are not renumbered, so old logs still make sense.
+
+Tie-break (scorer must implement): take the highest priority. Among equal priority, take the rule with the most condition keys. Then the larger `people_visible_min` (so R04 beats R01 for 3 people). Then the highest `min_confidence`. Then the lowest id. Example: a vehicle with 3 people matches R01 and R04. R04 wins (more specific, safety relevant).
+
+Known change in behavior: a person or unknown object with very low confidence (below 0.3) used to be logged. Now it asks. Check this against the labeled events (M5) and the interviews before deciding if it is noise.
+
+Demo check: deer -> R15 log. Empty truck -> R03 summarize. Truck with 2 people at 0.82 -> R01 interrupt. Unknown blob at 0.40, no people -> R12 ask.

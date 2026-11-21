@@ -1,0 +1,46 @@
+{
+  "split": "train",
+  "time": "20261114-192443",
+  "model_summary": {
+    "n": 91,
+    "action_acc": 0.7802197802197802,
+    "param_acc": 0.7966101694915254,
+    "exact_acc": 0.5824175824175825,
+    "clarify_recall": 0.5,
+    "clarify_reason_acc": 0.5,
+    "false_ask_rate": 0.029850746268656716,
+    "would_fly_wrong": 30,
+    "climb_descend_swaps": 3,
+    "outcomes": {
+      "exact": 53,
+      "wrong_params": 12,
+      "wrong_action": 6,
+      "false_ask": 2,
+      "invented_command": 12,
+      "wrong_reason": 6
+    }
+  },
+  "guarded_summary": {
+    "n": 91,
+    "action_acc": 0.7802197802197802,
+    "param_acc": 1.0,
+    "exact_acc": 0.6483516483516484,
+    "clarify_recall": 1.0,
+    "clarify_reason_acc": 0.5,
+    "false_ask_rate": 0.2537313432835821,
+    "would_fly_wrong": 3,
+    "climb_descend_swaps": 3,
+    "outcomes": {
+      "exact": 59,
+      "false_ask": 17,
+      "wrong_reason": 12,
+      "wrong_action": 3
+    }
+  },
+  "latency": {
+    "median": 2.900484082987532,
+    "p90": 4.963979125022888,
+    "max": 6.965366041986272
+  },
+  "normalize_input": true
+}

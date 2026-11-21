@@ -1,0 +1,5 @@
+# Demo script for main.py (needs a running llama-server, or see README for the fake)
+Search the north field for vehicles, radius 150 meters at 50 meters
+yes, loiter
+@wait
+Report status.
