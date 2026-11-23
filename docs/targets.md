@@ -44,9 +44,26 @@ Rule: we report the real number whether or not it meets the target. A missed tar
 
 ## Where we stand against the proposals (train split only, 2026-11-23)
 
-The test set has not been scored. These are train-split numbers from one run (`language/eval_results/train_20261123-015607.json`), so they do not say whether a held-out target is met. Thresholds are not changed here.
+The test set was scored once on 2026-11-23 (commit 34e7f10, 49 rows, one run, `language/eval_results/test_20261123-133448.json`; see the held-out result below). The other numbers here are train-split numbers from one run (`language/eval_results/train_20261123-015607.json`). Thresholds are not changed here.
 
 - **LoRA threshold (85% action accuracy on the train split):** not met. Action accuracy is 74.5% for the model alone and 77.8% after the guard. By the rule above, this says to do the LoRA fine-tune. LoRA is a stretch item and not done; this needs a team decision, and the week 8 feature freeze applies.
-- **Action accuracy >= 90% (final, held-out):** train-split action accuracy is 77.8% after the guard, so a miss is likely unless something changes. Report the real number either way.
+- **Action accuracy >= 90% (final, held-out):** **not met.** Held-out action accuracy is 83.7% after the guard (77.6% model alone), 49 rows, one run. It is also just under the 85% LoRA threshold, though that threshold was defined on the train split.
 - **Unsafe commands refused (`tools/regression.py`):** 27 of 27 with the scripted model. With the real model 25 of 27; both misses were the model answering clarify instead of goto, so nothing flew.
 - **Voice (quiet clips, `ggml-base.en`, one speaker):** word error rate 12.1% after number normalization (29.5% strict) on 20 clips. The noisy clips are synthetic (pink noise at 5 dB SNR): 10.0% on 10 clips, against 3.3% on the same 10 phrases quiet. Not field accuracy.
+
+## Held-out test result (scored once, 2026-11-23)
+
+`language/eval.py --split test --final`, commit 34e7f10, Llama 3.2 3B Q4_K_M, temperature 0, one run, 49 rows of our own synthetic commands. Simulator project, no real flights. One row is about 2 points. Result file: `language/eval_results/test_20261123-133448.json`; summary line in `language/test_runs.log`. Per-row output is not saved on purpose.
+
+| | Model alone | After guard |
+|---|---|---|
+| Action accuracy | 77.6% | 83.7% |
+| Parameter accuracy (right action) | 93.5% | 100% |
+| Exact match | 67.3% | 71.4% |
+| Clarify recall | 50.0% | 85.7% |
+| Clarify reason accuracy (when asked) | 57.1% | 50.0% |
+| False-ask rate | 2.9% | 17.1% |
+| Wrong commands that would fly | 12 | 2 |
+| Climb/descend swaps | 2 | 0 |
+
+Median latency 2.14 s, p90 3.24 s, max 7.12 s (model only, laptop under memory pressure). The prompt and guard were frozen before this run. Any later change to the prompt, examples, grammar or guard means this number no longer describes the system. The prompt examples use the same three places as the data, so place rows may be optimistic.

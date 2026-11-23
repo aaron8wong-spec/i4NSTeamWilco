@@ -1,6 +1,6 @@
 # Slides draft (2026-11-23)
 
-Draft only. Numbers marked (train) or (quiet clips) are from our own runs; see `docs/targets.md` and `docs/hardware.md` for how each was measured. Fill the final numbers after the feature freeze (the held-out test set is not scored yet). Do not add a number that is not in the repo.
+Draft only. Numbers marked (train) or (quiet clips) are from our own runs; see `docs/targets.md` and `docs/hardware.md` for how each was measured. The held-out test set was scored once on 2026-11-23 (49 rows); other final numbers come after the feature freeze. Do not add a number that is not in the repo.
 
 ## 1. Title
 Army-737 "Say Less, Fly More". Tell the drone what to do, and it only interrupts you when it matters.
@@ -37,7 +37,7 @@ Army-737 "Say Less, Fly More". Tell the drone what to do, and it only interrupts
 - Lost link: hold, then return home (stretch; show only if recorded).
 
 ## 8. Results so far (all from simulation and our own data)
-- Command accuracy (train split, 212 rows, one run, after guard): action 77.8%, exact 68.4%. Held-out test not scored yet. Fill in after the freeze.
+- Command accuracy (train split, 212 rows, one run, after guard): action 77.8%, exact 68.4%. Held-out test (49 rows, scored once, one run): action 83.7% after the guard (77.6% model alone), exact 71.4%, wrong commands that would fly 2 of 49, false-ask rate 17.1%. Below the 90% goal.
 - Wrong commands that reach the gate (train, after guard): 11 of 212. The gate catches many, not all.
 - Safety gate regression: 27 of 27 cases with the scripted model; 25 of 27 with the real model (both misses were the model asking instead of flying).
 - Voice (whisper base.en, one speaker, quiet clips): 12.1% word error rate after number normalization (20 clips).
