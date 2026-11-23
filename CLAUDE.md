@@ -7,7 +7,7 @@ START HERE (every AI assistant reads this first, every session)
 6. The rules in sections 0 and 9 below still apply. If this section and docs/work-plan.md disagree, work-plan.md wins for task order and CLAUDE.md wins for scope.
 
 i4NS Army-737 "Say Less, Fly More": Team Context for AI Assistants
-Last updated: 2026-11-19 (status in section 13 was checked against the repo on main at commit 4edebeb); schema section updated 2026-11-14 for v1.2.0. If section 13 and the README disagree, check the repo. Schemas frozen at v1.2.0 (v1.0.0 team vote done; the v1.1.0 and v1.2.0 relative-move additions still need the vote recorded in the group channel). Paste this whole document into your AI tool, then tell it: "I am role R_ (name the role). My current task is _." The AI should then work from this document and ask before breaking any rule in section 9.
+Last updated: 2026-11-23 (Lane M items in section 13 were refreshed from docs/status-lane-m.md on main at commit 9dedf95; Lane S items were not re-checked); schema section updated 2026-11-14 for v1.2.0. If section 13 and the README disagree, check the repo. Schemas frozen at v1.2.0 (v1.0.0 team vote done; the v1.1.0 and v1.2.0 relative-move additions still need the vote recorded in the group channel). Paste this whole document into your AI tool, then tell it: "I am role R_ (name the role). My current task is _." The AI should then work from this document and ask before breaking any rule in section 9.
 
 0. Instructions to the AI assistant reading this
 You are helping one member of a five-person university team build a 10-week MVP of a sponsor challenge. Use this document as the source of truth.
@@ -32,7 +32,7 @@ A closed-loop feedback mechanism is needed: the local model looks at imagery, te
 Suggested starting point for an academic team: evaluate alternative edge hardware and tune a lightweight model for basic intent tracking, rather than attempting full system integration from the start.
 Beneficiaries: airborne infantry squads, special operations teams, small-unit reconnaissance, robotic and autonomous systems program offices.
 2. Our concept (in one paragraph)
-Three parts: the drone, a local compute node, and the operator. The operator speaks a task, and the drone flies it and tells the operator only what matters. It works like a DJI Mavic: manual flight is always available, and AI mode is a separate switch. The AI narrates on request, not continuously. One request can imply a long multi-step task, for example: "Go over the ridge and search for vehicles; if you see some, identify the type and any people inside."
+Three parts: the drone, a local compute node, and the operator. The operator speaks a task, and the drone flies it and tells the operator only what matters. It works like a DJI Mavic: manual flight is always available, and AI mode is a separate switch. The AI narrates on request, not continuously. One request can imply a long multi-step task (not in the MVP: decided 2026-11-23, see section 5), for example: "Go over the ridge and search for vehicles; if you see some, identify the type and any people inside."
 Open questions we are researching through interviews:
 How does the system behave under jamming or degraded comms, and what should the drone do when it loses contact mid-task?
 How much autonomy will operators trust for long tasks?
@@ -45,11 +45,11 @@ Deterministic flight from voice commands. The operator's words become a structur
 Report only what matters. As the simulated drone flies, events come back. Code decides which ones to interrupt the operator about, which to summarize, which to log, and when to ask first.
 What links them is the mission. A command like "search the north field for vehicles" sets a target in mission_state. That target drives both the flight (a search pattern) and the scoring (what counts as relevant). An alert can ask a question, and the operator's answer re-enters through the same command path.
 One demo scenario (everything is built to serve this):
-Operator: "Search the north field for vehicles."
+Operator: "Search the north field for vehicles, radius 150 meters at 50 meters." (The model must not guess a radius or altitude: with the bare line "Search the north field for vehicles" the system asks for them, which is correct clarify behavior.)
 Drone flies the search pattern in the simulator.
 Planted events fire as the drone nears them: a deer, a truck, a truck with two people, a low-confidence blob.
 Scorer: deer → log; truck → summarize; truck with people → interrupt; low-confidence risky object → ask first.
-Drone says: "Vehicle with two people at the east edge. Loiter?"
+The truck with people interrupts with an alert that says why. The low-confidence blob asks first. Drone says, for example: "Unknown object (rule R12: Unidentified object). Want me to take a closer look?"
 Operator: "Yes, loiter." The drone loiters.
 Core design rule: the LLM suggests, deterministic code decides. The language model only turns text into one of a fixed set of JSON commands. A safety gate in plain code checks every command. The language model never talks to the autopilot directly.
 Architecture:
@@ -78,7 +78,7 @@ Typed text -> JSON -> safe simulated flight, with the safety gate enforced.
 Command dataset and measured accuracy on a held-out test set.
 Scripted event feed, rules table and scorer, with measured precision and recall.
 Ask-first loop.
-Should have: live whisper.cpp voice input; one multi-step command; a hardware benchmark table.
+Should have: live whisper.cpp voice input; a hardware benchmark table. (A multi-step command was dropped on 2026-11-23.)
 Stretch: LoRA fine-tune (only if accuracy is clearly low); spoken output; lost-link demo polish; power measurements.
 Out of scope. Plan only, in the roadmap: real camera perception, real drone hardware, jamming tests, alternative-chip deep dive, ROS 2 / Micro-XRCE-DDS, cloud services (Pinecone etc.), a vector database (ChromaDB is a stretch, not a requirement).
 Honest limits we must state in every presentation:
@@ -104,8 +104,8 @@ Location in goto, search_area and loiter is given one way, never mixed: a place 
 search_area target is one of vehicle, person, structure, any. loiter has no altitude (it keeps the current one). move goes distance_m from the drone's current position on bearing_deg (whole degrees clockwise from true north, 0 to 359) at alt_m, which is required. Compass words ("northeast") are not accepted: the model uses clarify. climb and descend change height by amount_m from the current altitude, over the same spot (two actions, because the grammar cannot write negative numbers). report_status reads out what was found since the last report (the summarize list).
 clarify reason is one of missing_location, missing_altitude, ambiguous_reference, unsupported_action, unsafe_request, unclear_speech. Use clarify for vague, impossible or unsafe requests. Do not guess a value.
 Ranges in the schema are outer bounds so the grammar can keep the model inside them. They are not safety limits. The safety gate applies the real limits and refuses with a reason (alt_m 800 is valid JSON the gate can refuse).
-Not in v1.2.0 (adding any is a schema change): multi-step commands (a list of commands), compass-word moves ("10 m north"), setting an absolute altitude without a place, "follow me", and anything involving weapons or engagement.
-Places: a place name must be resolved to lat/lon by code from a places table. A name not in the table is refused with a reason (it is not a model failure). integration/places.json now holds three places that Lane S verified by flying to them in the sim (north_field, buildings, bridge). More are needed: the dataset uses eight other names that are not real places yet. Build the rest from the Gazebo Baylands world. Facts from `baylands.sdf` (PX4 gz worlds folder): the world frame is ENU (x east, y north, z up) with one GPS origin, latitude 37.412173071650805, longitude -121.998878727967, elevation 38 m. The file itself holds only lights, physics and two Fuel includes: the `baylands` park model at pose (205, 155, -1) and `Coast Water`. The buildings, bridge, trees and ground (building_1, bridge, ground_plane) live inside the downloaded Fuel model, in that model's own coordinates. A world point is the model-local point plus (205, 155). Then north_m = world Y and east_m = world X, measured from the origin. If PX4 spawns the drone at the world origin, PX4's home is the origin; check the sim's `[SIM] home` line before trusting any conversion. Place names are points we choose, not model names: pick open ground near landmarks and confirm each one in Gazebo (fly the drone there and read the position). The place names in data/ are placeholders until this table exists. Owner: Lane M builds it, Lane S confirms points in the sim.
+Not in v1.2.0 (adding any is a schema change; multi-step commands were voted out on 2026-11-23 and are not planned for the MVP): multi-step commands (a list of commands), compass-word moves ("10 m north"), setting an absolute altitude without a place, "follow me", and anything involving weapons or engagement.
+Places: a place name must be resolved to lat/lon by code from a places table. A name not in the table is refused with a reason (it is not a model failure). integration/places.json now holds three places that Lane S verified by flying to them in the sim (north_field, buildings, bridge). Decided 2026-11-23: only these three verified places are used, and no new ones are being added. The dataset's placeholder names were remapped onto them. Facts for anyone who adds places later, from `baylands.sdf` (PX4 gz worlds folder): the world frame is ENU (x east, y north, z up) with one GPS origin, latitude 37.412173071650805, longitude -121.998878727967, elevation 38 m. The file itself holds only lights, physics and two Fuel includes: the `baylands` park model at pose (205, 155, -1) and `Coast Water`. The buildings, bridge, trees and ground (building_1, bridge, ground_plane) live inside the downloaded Fuel model, in that model's own coordinates. A world point is the model-local point plus (205, 155). Then north_m = world Y and east_m = world X, measured from the origin. If PX4 spawns the drone at the world origin, PX4's home is the origin; check the sim's `[SIM] home` line before trusting any conversion. Place names are points we choose, not model names: pick open ground near landmarks and confirm each one in Gazebo (fly the drone there and read the position). The place names in data/ now use only north_field, buildings and bridge. Owner: Lane M owns the table, Lane S confirms points in the sim. None of the three has been checked by eye in the Gazebo view yet (places.json says seen_in_view false).
 Event (what the simulated drone "sees"):
 {"id": "E03", "type": "vehicle", "confidence": 0.79, "lat": 32.8821, "lon": -117.2384, "time_s": 142.5, "people_visible": 2, "subtype": "truck"}
 
@@ -173,7 +173,7 @@ Waypoint callback that reports the drone's position
 Event emitter: read a scenario file (finds as meters north/east of home), fire each find once when the drone is within about 60 m, with confidence noise; read home from the sim
 7
 8.3
-Multi-step command and lost-link demo
+Lost-link demo (multi-step was dropped on 2026-11-23)
 8
 9.1
 Flight tests: 20+ runs per action, log final position and limit violations
@@ -375,7 +375,7 @@ Program officers / sponsor: an operator cannot fly a controller and watch their 
 Operators / interviewees: show the scenario video and ask what they would want to be interrupted about. Their answers change the rules table.
 One-sentence version: "Tell the drone what to do, and it only interrupts you when it matters."
 
-13. Status (checked against the repo on 2026-11-19; main at 4edebeb)
+13. Status (Lane M items refreshed 2026-11-23 from docs/status-lane-m.md, main at 9dedf95; the Lane S items and the task marks in section 8 are from 2026-11-19 and were not re-checked. For current Lane M status read docs/status-lane-m.md)
 Simulation world: Gazebo Baylands, GPS origin 37.412173, -121.998878. Seeds and dataset use Baylands coordinates. Older text that says 32.88, -117.24 (UCSD) is out of date.
 Done and on main:
 - 5.1 repo layout, 5.2 schemas frozen (v1.2.0, change log in docs/schemas.md), 5.3/5.4 PX4 SITL + Gazebo + MAVSDK waypoint test (one machine, WSL2), 5.5 grammar + llama.cpp (40/40 schema-valid), 5.6 seeds (57), 5.7 whisper.cpp on 10 clips (WER 12.1%, 7/10 exact), 5.8 rules.json (15 rules).
@@ -385,15 +385,15 @@ Done and on main:
 Task marks in section 8: [DONE] and [PARTIAL] were set from the repo on 2026-11-19. An unmarked task is not in the repo.
 Not in the repo (as of this check):
 - R1: flight/safety.py is written (23 tests pass, Lane S, 2026-11-19) but not yet on main, and it has gaps listed in docs/contracts.md section 3. Still missing: geo.py (now integration/geo.py), the five-action implementation incl. search_area sweep and loiter (6.2), position stream (6.3), event emitter (7.3), 5.3 second machine.
-- R2: mission_state in the prompt and follow-up examples (7.4); 6.4 expansion; clarify-at-25% check.
-- R3: transcribe(), push-to-talk recorder, 30 clips (6.7); voice loop (7.6); operator text templates (7.7). Only 5 recordings (10 WAVs) exist.
-- R4: scorer.py, labeled events, tests (6.8, 7.2, 7.8).
-- R5: places.json, mission_state.py (7.1), main.py (7.5), docs/targets.md (6.9), interview log in repo (5.9, 6.10).
+- R2 (done since 2026-11-19): mission_state in the prompt and follow-up examples (7.4, 44 rows); dataset expanded to 261 rows (212 train, 49 test, clarify 28.7%; the 50-row test minimum is missed by one); 10% hand check passed (user report). Train-split numbers after the guard on 2026-11-23: action 77.8%, exact 68.4%, 11 wrong commands that would fly of 212. The held-out test set is not scored. LoRA threshold (85% train action accuracy) is not met; needs a team decision. A second model size has not been run.
+- R3 (partly done): voice/transcribe.py, record.py, WER script and 30 clips exist; 20 quiet clips (one speaker) score 12.1% WER after number normalization with base.en, and the 10 noisy clips are synthetic (pink noise, 5 dB SNR) because real noisy recording was not possible. Voice loop in main.py (M12) works on the mock. The recorder is not tested on a real microphone. Voice-to-motion timing (I3) needs the real backend.
+- R4 (done): scorer, templates, 30 labeled events (15 frozen), spec in docs/scoring-spec.md. Frozen events not scored yet.
+- R5 (done on the mock): places.json (3 places), mission_state.py, pipeline.py and main.py on MockFlight and FakeEvents, docs/targets.md, roadmap and slides outline. Still on the real backend (I1, I2): not done.
 Known problems:
-- reporting/rules.json does not match the frozen Rule schema: all 15 rules fail validation (uses applies_to and a text condition string; the schema wants event_type and a condition object with people_visible_min, in_search_area, matches_target). Migrate it before writing the scorer. Some rules also use confidence in the condition; the schema has no such key (min_confidence covers it).
-- Multi-step commands: section 5 says they are not in v1.2.0, but the week 8 plan assumes {steps: [...]}. That is a schema change and needs a vote and a grammar rebuild.
+- reporting/rules.json was migrated to the Rule schema on 2026-11-20 (15 rules merged into 10; see docs/rules-migration.md). This problem is closed.
+- Multi-step commands: decided NO on 2026-11-23 (schema stays v1.2.0; M9 and S7 dropped). Any older text that assumes {steps: [...]} is out of date.
 - Votes for v1.1.0 (move) and v1.2.0 (climb, descend) still need recording in the group channel.
-- Place names in the dataset are placeholders, and place-based rows are the weakest class (1 of 15 exact on the train split).
+- Place names: the dataset now uses only the three verified places (remapped 2026-11-23). Place-based rows were the weakest class before the prompt gained place examples; those examples use the same places, so train scores on place rows are optimistic.
 - Latency numbers (about 3 to 6 s per command) came from a swapping 16 GB laptop and are a worst case.
 - Branches not merged to main: lucas-eibert-patch-1 (old, diverged). Teammates may hold unpushed work, especially R1 on the WSL machine. Ask before assuming something is missing.
 Two-person split (from 2026-11-19): Lane M (language, reporting, voice, integration, docs) and Lane S (flight). See docs/who-owns-what.md, docs/contracts.md and the kickoff prompts docs/kickoff-lane-m.md and docs/kickoff-lane-s.md. geo.py lives in integration/ (not flight/) so it has one owner.
