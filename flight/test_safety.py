@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit tests for flight/safety.py (Task 6.1).
+"""Unit tests for flight/safety.py (Task 6.1 / contracts.md section 3).
 
 Run:
     python3 -m pytest flight/test_safety.py -v
@@ -22,7 +22,8 @@ def gate():
         max_alt_m=120.0,
         min_alt_m=1.0,
         geofence_radius_m=1500.0,
-        min_battery_percent=20.0
+        min_battery_percent=25.0,
+        max_loiter_radius_m=500.0,
     ))
 
 
@@ -31,6 +32,7 @@ def default_state():
     return DroneState(
         mode="ai",
         battery_percent=100.0,
+        link_ok=True,
         home_lat=BAYLANDS_HOME[0],
         home_lon=BAYLANDS_HOME[1],
         current_lat=BAYLANDS_HOME[0],
@@ -39,7 +41,8 @@ def default_state():
         places={
             "north_field": {"lat": 37.413972, "lon": -121.996161},
             "buildings": {"lat": 37.412892, "lon": -121.997066},
-        }
+        },
+        known_event_ids=["E01", "E02", "E03"],
     )
 
 
@@ -67,7 +70,6 @@ def test_destination_point():
 # --- Schema Gate Tests ---
 
 def test_reject_invalid_schema(gate, default_state):
-    # Invalid missing parameters
     bad_cmd = {"action": "goto", "params": {}}
     ok, reason = gate.check_command(bad_cmd, default_state)
     assert not ok
@@ -81,7 +83,7 @@ def test_reject_unknown_action(gate, default_state):
     assert "not schema-valid" in reason
 
 
-# --- Mode & Battery Tests ---
+# --- Mode, Lost-Link & Battery Tests ---
 
 def test_manual_mode_refuses_ai_commands(gate, default_state):
     default_state.mode = "manual"
@@ -91,8 +93,22 @@ def test_manual_mode_refuses_ai_commands(gate, default_state):
     assert "manual mode" in reason
 
 
+def test_lost_link_refuses_flight(gate, default_state):
+    default_state.link_ok = False
+    cmd = {"action": "goto", "params": {"lat": 37.413972, "lon": -121.996161, "alt_m": 40}}
+    ok, reason = gate.check_command(cmd, default_state)
+    assert not ok
+    assert "link lost" in reason
+
+
+def test_lost_link_permits_hold_and_return_home(gate, default_state):
+    default_state.link_ok = False
+    assert gate.check_command({"action": "hold", "params": {}}, default_state) == (True, "ok")
+    assert gate.check_command({"action": "return_home", "params": {}}, default_state) == (True, "ok")
+
+
 def test_low_battery_refuses_flight(gate, default_state):
-    default_state.battery_percent = 15.0
+    default_state.battery_percent = 20.0  # below 25% floor
     cmd = {"action": "goto", "params": {"lat": 37.413972, "lon": -121.996161, "alt_m": 40}}
     ok, reason = gate.check_command(cmd, default_state)
     assert not ok
@@ -105,6 +121,33 @@ def test_low_battery_permits_return_home(gate, default_state):
     ok, reason = gate.check_command(cmd, default_state)
     assert ok
     assert reason == "ok"
+
+
+# --- Fail-Safe on Missing State Tests ---
+
+def test_missing_home_refuses_geofence_checks(gate, default_state):
+    default_state.home_lat = None
+    default_state.home_lon = None
+    cmd = {"action": "goto", "params": {"lat": 37.413972, "lon": -121.996161, "alt_m": 40}}
+    ok, reason = gate.check_command(cmd, default_state)
+    assert not ok
+    assert "home position unknown" in reason
+
+
+def test_missing_current_position_refuses_move(gate, default_state):
+    default_state.current_lat = None
+    cmd = {"action": "move", "params": {"distance_m": 300, "bearing_deg": 90, "alt_m": 40}}
+    ok, reason = gate.check_command(cmd, default_state)
+    assert not ok
+    assert "current position unknown" in reason
+
+
+def test_missing_current_altitude_refuses_climb_and_descend(gate, default_state):
+    default_state.current_alt_m = None
+    ok1, reason1 = gate.check_command({"action": "climb", "params": {"amount_m": 10}}, default_state)
+    assert not ok1 and "current altitude unknown" in reason1
+    ok2, reason2 = gate.check_command({"action": "descend", "params": {"amount_m": 10}}, default_state)
+    assert not ok2 and "current altitude unknown" in reason2
 
 
 # --- Goto & Altitude Tests ---
@@ -138,7 +181,6 @@ def test_goto_altitude_too_high_refused(gate, default_state):
 
 
 def test_goto_outside_geofence_refused(gate, default_state):
-    # San Francisco (~45 km away)
     cmd = {"action": "goto", "params": {"lat": 37.7749, "lon": -122.4194, "alt_m": 40}}
     ok, reason = gate.check_command(cmd, default_state)
     assert not ok
@@ -162,7 +204,6 @@ def test_move_exceeds_geofence(gate, default_state):
 
 
 def test_climb_within_limit(gate, default_state):
-    default_state.current_alt_m = 40.0
     cmd = {"action": "climb", "params": {"amount_m": 30}}
     ok, reason = gate.check_command(cmd, default_state)
     assert ok
@@ -177,7 +218,6 @@ def test_climb_exceeds_limit(gate, default_state):
 
 
 def test_descend_within_limit(gate, default_state):
-    default_state.current_alt_m = 40.0
     cmd = {"action": "descend", "params": {"amount_m": 20}}
     ok, reason = gate.check_command(cmd, default_state)
     assert ok
@@ -203,7 +243,6 @@ def test_search_area_valid(gate, default_state):
 
 
 def test_search_area_boundary_exceeds_geofence(gate, default_state):
-    # Target center is 1400m away, radius is 200m -> total 1600m > 1500m geofence
     lat, lon = destination_point(BAYLANDS_HOME[0], BAYLANDS_HOME[1], 0.0, 1400.0)
     cmd = {
         "action": "search_area",
@@ -214,50 +253,38 @@ def test_search_area_boundary_exceeds_geofence(gate, default_state):
     assert "geofence" in reason
 
 
-# --- Loiter, Hold, Clarify Tests ---
+# --- Loiter, Event ID & Radius Tests ---
 
-def test_hold_always_passes(gate, default_state):
-    ok, reason = gate.check_command({"action": "hold", "params": {}}, default_state)
-    assert ok
-
-
-def test_clarify_always_passes(gate, default_state):
-    cmd = {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How high?"}}
+def test_loiter_known_event_passes(gate, default_state):
+    cmd = {"action": "loiter", "params": {"event_id": "E03", "radius_m": 30, "duration_s": 120}}
     ok, reason = gate.check_command(cmd, default_state)
     assert ok
+    assert reason == "ok"
 
 
-if __name__ == "__main__":
-    g = SafetyGate(SafetyConfig())
-    s = DroneState(
-        mode="ai", battery_percent=100.0,
-        home_lat=BAYLANDS_HOME[0], home_lon=BAYLANDS_HOME[1],
-        current_lat=BAYLANDS_HOME[0], current_lon=BAYLANDS_HOME[1], current_alt_m=40.0,
-        places={"north_field": {"lat": 37.413972, "lon": -121.996161}}
-    )
-    test_haversine_zero_distance()
-    test_haversine_known_distance()
-    test_destination_point()
-    test_reject_invalid_schema(g, s)
-    test_reject_unknown_action(g, s)
-    test_manual_mode_refuses_ai_commands(g, s)
-    s.mode = "ai"
-    test_low_battery_refuses_flight(g, s)
-    test_low_battery_permits_return_home(g, s)
-    s.battery_percent = 100.0
-    test_goto_valid(g, s)
-    test_goto_place_resolution(g, s)
-    test_goto_unlisted_place_refused(g, s)
-    test_goto_altitude_too_high_refused(g, s)
-    test_goto_outside_geofence_refused(g, s)
-    test_move_within_geofence(g, s)
-    test_move_exceeds_geofence(g, s)
-    test_climb_within_limit(g, s)
-    test_climb_exceeds_limit(g, s)
-    test_descend_within_limit(g, s)
-    test_descend_below_min_limit(g, s)
-    test_search_area_valid(g, s)
-    test_search_area_boundary_exceeds_geofence(g, s)
-    test_hold_always_passes(g, s)
-    test_clarify_always_passes(g, s)
-    print("All 22 flight safety tests passed!")
+def test_loiter_unknown_event_refused(gate, default_state):
+    cmd = {"action": "loiter", "params": {"event_id": "E99", "radius_m": 30, "duration_s": 120}}
+    ok, reason = gate.check_command(cmd, default_state)
+    assert not ok
+    assert "not recognized" in reason
+
+
+def test_loiter_radius_too_large_refused(gate, default_state):
+    # S40: 1000m loiter radius
+    cmd = {"action": "loiter", "params": {"event_id": "E03", "radius_m": 1000, "duration_s": 120}}
+    ok, reason = gate.check_command(cmd, default_state)
+    assert not ok
+    assert "exceeds maximum limit" in reason
+
+
+def test_config_loader():
+    cfg = SafetyConfig.from_file()
+    assert cfg.max_alt_m == 120.0
+    assert cfg.min_battery_percent == 25.0
+    assert cfg.geofence_radius_m == 1500.0
+
+
+def test_hold_and_clarify_always_pass(gate, default_state):
+    assert gate.check_command({"action": "hold", "params": {}}, default_state) == (True, "ok")
+    cmd = {"action": "clarify", "params": {"reason": "missing_altitude", "question": "How high?"}}
+    assert gate.check_command(cmd, default_state) == (True, "ok")

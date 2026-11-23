@@ -29,11 +29,38 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 SCHEMA_PATH = ROOT / "integration" / "schemas.json"
+PLACES_PATH = ROOT / "integration" / "places.json"
 
-# Test limits only. The real values come from config and R1's safety.py.
-MAX_ALT_M = 120
-GEOFENCE_M = 1500        # max horizontal distance from home
+from integration.geo import destination_point, distance_m
+from flight.safety import DroneState, SafetyConfig, SafetyGate
+
+_GATE = None
+
+
+def get_safety_gate():
+    global _GATE
+    if _GATE is None:
+        _GATE = SafetyGate.from_config()
+    return _GATE
+
+
+def load_places():
+    if PLACES_PATH.exists():
+        try:
+            data = json.loads(PLACES_PATH.read_text())
+            return {k: v for k, v in data.items() if not k.startswith("_")}
+        except Exception:
+            pass
+    return {}
+
+
+# Flight limits and parameters
+GATE_CONFIG = get_safety_gate().config
+MAX_ALT_M = GATE_CONFIG.max_alt_m
+GEOFENCE_M = GATE_CONFIG.geofence_radius_m
 TAKEOFF_ALT_M = 10
 ARRIVE_HORIZ_M = 3.0
 ARRIVE_VERT_M = 2.0
@@ -42,28 +69,7 @@ SUPPORTED = {"goto", "move", "climb", "descend", "hold", "return_home"}
 
 
 def load_validator():
-    from jsonschema import Draft202012Validator
-    schema = json.loads(SCHEMA_PATH.read_text())
-    cmd_schema = {"$schema": schema.get("$schema"), "$defs": schema["$defs"], "$ref": "#/$defs/Command"}
-    return Draft202012Validator(cmd_schema)
-
-
-def distance_m(lat1, lon1, lat2, lon2):
-    """Great-circle distance in meters (haversine)."""
-    r = 6371000.0
-    p1, p2 = math.radians(lat1), math.radians(lat2)
-    dp, dl = p2 - p1, math.radians(lon2 - lon1)
-    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
-    return 2 * r * math.asin(math.sqrt(a))
-
-
-def destination_point(lat, lon, bearing_deg, dist_m):
-    """Point reached by going dist_m meters from (lat, lon) on a bearing (degrees clockwise from north)."""
-    r = 6371000.0
-    p1, l1, th, dr = math.radians(lat), math.radians(lon), math.radians(bearing_deg), dist_m / r
-    p2 = math.asin(math.sin(p1) * math.cos(dr) + math.cos(p1) * math.sin(dr) * math.cos(th))
-    l2 = l1 + math.atan2(math.sin(th) * math.sin(dr) * math.cos(p1), math.cos(dr) - math.sin(p1) * math.sin(p2))
-    return math.degrees(p2), (math.degrees(l2) + 540) % 360 - 180
+    return get_safety_gate().validator
 
 
 def new_altitude(current_alt_m, action, amount_m):
@@ -74,29 +80,39 @@ def new_altitude(current_alt_m, action, amount_m):
     return alt
 
 
-def check_command(cmd, validator, home=None):
-    """Return (ok, reason). Schema first, then simple test limits."""
-    errors = sorted(validator.iter_errors(cmd), key=lambda e: list(e.path))
-    if errors:
-        return False, f"not schema-valid: {errors[0].message}"
-    action, p = cmd["action"], cmd["params"]
+def check_command(cmd, validator=None, home=None, state=None):
+    """Return (ok, reason). Validated through SafetyGate."""
+    gate = get_safety_gate()
+    action = cmd.get("action")
     if action not in SUPPORTED:
         return False, f"'{action}' is valid JSON but this smoke test only flies {sorted(SUPPORTED)}"
-    if action == "move":
-        # The destination depends on the live position, so the geofence is checked on the goto it becomes.
-        if p["alt_m"] > MAX_ALT_M:
-            return False, f"alt_m {p['alt_m']} is above the {MAX_ALT_M} m limit"
-    if action == "goto":
-        if "place" in p:
-            return False, f"place '{p['place']}' needs the places table (not built yet); use lat/lon"
-        if p["alt_m"] > MAX_ALT_M:
-            return False, f"alt_m {p['alt_m']} is above the {MAX_ALT_M} m limit"
-        if home is not None:
-            d = distance_m(home[0], home[1], p["lat"], p["lon"])
-            if d > GEOFENCE_M:
-                return False, (f"target is {d:.0f} m from home, outside the {GEOFENCE_M} m geofence "
-                               "(is PX4's home where the seed coordinates are, e.g. the Baylands world?)")
-    return True, "ok"
+
+    if state is None:
+        home_lat, home_lon = home if home is not None else (None, None)
+        state = DroneState(
+            mode="ai",
+            battery_percent=100.0,
+            link_ok=True,
+            home_lat=home_lat,
+            home_lon=home_lon,
+            current_lat=home_lat,
+            current_lon=home_lon,
+            current_alt_m=40.0 if home_lat is not None else None,
+            places=load_places(),
+        )
+
+    # Unit test / dry-run convenience for move: if state has no position/home yet,
+    # validate schema and altitude ceiling so pre-flight checks report meaningful altitude errors.
+    if action == "move" and (state.current_lat is None or state.home_lat is None):
+        errors = sorted(gate.validator.iter_errors(cmd), key=lambda e: list(e.path))
+        if errors:
+            return False, f"not schema-valid: {errors[0].message}"
+        alt = cmd.get("params", {}).get("alt_m", 0)
+        if alt > gate.config.max_alt_m:
+            return False, f"alt_m {alt} is above the {gate.config.max_alt_m:.0f} m limit"
+        return True, "ok"
+
+    return gate.check_command(cmd, state)
 
 
 def command_from_llm(text, url):
@@ -127,29 +143,45 @@ async def fly(cmd):
             break
     async for home in drone.telemetry.home():
         break
+    async for here in drone.telemetry.position():
+        break
+    battery_pct = 100.0
+    async for b in drone.telemetry.battery():
+        battery_pct = b.remaining_percent * 100.0
+        break
+
     print(f"[SIM] home lat={home.latitude_deg:.6f} lon={home.longitude_deg:.6f} amsl={home.absolute_altitude_m:.1f}")
+
+    places = load_places()
+    state = DroneState(
+        mode="ai",
+        battery_percent=battery_pct,
+        link_ok=True,
+        home_lat=home.latitude_deg,
+        home_lon=home.longitude_deg,
+        current_lat=here.latitude_deg,
+        current_lon=here.longitude_deg,
+        current_alt_m=here.relative_altitude_m,
+        places=places,
+    )
 
     validator = load_validator()
     if cmd["action"] == "move":
-        ok, reason = check_command(cmd, validator)
+        ok, reason = check_command(cmd, validator, state=state)
         if not ok:
             print(f"[GATE] refused: {reason}")
             return 2
         m = cmd["params"]
-        async for here in drone.telemetry.position():
-            break
         lat, lon = destination_point(here.latitude_deg, here.longitude_deg, m["bearing_deg"], m["distance_m"])
         print(f"[MOVE] {m['distance_m']} m at {m['bearing_deg']} deg from {here.latitude_deg:.6f}, "
               f"{here.longitude_deg:.6f} -> {lat:.6f}, {lon:.6f}")
         cmd = {"action": "goto", "params": {"lat": round(lat, 6), "lon": round(lon, 6), "alt_m": m["alt_m"]}}
 
     if cmd["action"] in ("climb", "descend"):
-        ok, reason = check_command(cmd, validator)
+        ok, reason = check_command(cmd, validator, state=state)
         if not ok:
             print(f"[GATE] refused: {reason}")
             return 2
-        async for here in drone.telemetry.position():
-            break
         try:
             alt = new_altitude(here.relative_altitude_m, cmd["action"], cmd["params"]["amount_m"])
         except ValueError as e:
@@ -158,7 +190,17 @@ async def fly(cmd):
         print(f"[{cmd['action'].upper()}] {here.relative_altitude_m:.0f} m -> {alt} m over {here.latitude_deg:.6f}, {here.longitude_deg:.6f}")
         cmd = {"action": "goto", "params": {"lat": round(here.latitude_deg, 6), "lon": round(here.longitude_deg, 6), "alt_m": alt}}
 
-    ok, reason = check_command(cmd, validator, (home.latitude_deg, home.longitude_deg))
+    # Pre-resolve place to lat/lon for the backend if given by place name
+    if cmd["action"] == "goto" and "place" in cmd.get("params", {}):
+        ok, reason = check_command(cmd, validator, state=state)
+        if not ok:
+            print(f"[GATE] refused: {reason}")
+            return 2
+        p_name = cmd["params"]["place"]
+        loc = places[p_name]
+        cmd = {"action": "goto", "params": {"lat": round(loc["lat"], 6), "lon": round(loc["lon"], 6), "alt_m": cmd["params"]["alt_m"]}}
+
+    ok, reason = check_command(cmd, validator, state=state)
     if not ok:
         print(f"[GATE] refused: {reason}")
         return 2

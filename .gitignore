@@ -3,3 +3,6 @@ __pycache__/
 *.ulg
 *.log
 runs/
+*.zip
+map.txt
+mesh_log.txt
