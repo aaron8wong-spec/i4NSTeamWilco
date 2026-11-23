@@ -39,6 +39,7 @@ Rule: we report the real number whether or not it meets the target. A missed tar
 - Voice numbers come from our own recordings, not from field audio. We make no field claim.
 - Latency was measured on student laptops and is not a statement about edge hardware.
 - Each number is from one run or a small number of runs unless the table says otherwise.
+- All model results come from one small model (Llama 3.2 3B, 4-bit) on one laptop. We expect a larger model and better hardware to do better, but we have not tested either, so we make no claim about how much.
 - No jamming tests, no real hardware, no power measurement unless a wall meter was used (see `docs/hardware.md`).
 
 ## Where we stand against the proposals (train split only, 2026-11-23)

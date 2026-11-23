@@ -54,11 +54,13 @@ Army-737 "Say Less, Fly More". Tell the drone what to do, and it only interrupts
 - Results are from a simulator, not real flights.
 - Accuracy numbers come from our own synthetic data and one speaker.
 - No jamming tests, no real hardware.
+- One small model (3B, 4-bit) on one laptop. We expect a larger model and better hardware to improve accuracy, but we have not tested it.
 
 ## 11. What we found
 - A small on-device model is fast enough to try, but it sometimes answers confidently when it should ask. The gate and the guard exist because of that.
 - Voice adds failure modes: "come down" was heard as "calm down" and "loiter" as "water".
 - Plain-code decisions are what make the system testable.
+- Accuracy is limited by a small model on modest hardware. A larger model on better hardware is the obvious next step (untested).
 
 ## 12. Roadmap (see `docs/roadmap.md`)
 - Real perception, real hardware, jamming and lost-link tests, alternative low-power chips, multi-step commands, more places, spoken output.
