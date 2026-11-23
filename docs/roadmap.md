@@ -14,13 +14,14 @@ One loop works end to end in simulation: spoken or typed text becomes one of ten
 
 ## Next: make the MVP result stronger
 
-These need no new hardware.
+All but item 2 need no new hardware.
 
 1. **Score the held-out test set once** (49 rows) and report action and parameter accuracy separately. On the train split the model alone gets 74.5% action accuracy and 77.8% after the guard, below our proposed 85% LoRA threshold and the 90% held-out goal. The open question is whether to fine-tune (LoRA) or change the prompt and model size. We have not tried a second model size yet.
-2. **Fewer wrong confident commands.** After the guard, 11 of 212 train rows still produce a wrong command that would reach the gate. The gate catches many of them, but not all. Candidates: a stricter grounding check on distance and bearing, and more clarify examples.
-3. **Real noise for voice.** The noisy clips are synthetic. Record real noisy clips and re-score.
-4. **Voice to motion timing**, at least 20 runs, once the real flight backend is connected.
-5. **Operator feedback.** Show the demo to operators and let their answers change the rules table. The rules and message wording have not been tested with any real operator.
+2. **Try a larger model on better hardware.** Every model result so far comes from one small model (Llama 3.2 3B, 4-bit) on one laptop that was short of memory. We expect a larger model and more capable hardware to improve accuracy, and the sponsor's edge-hardware question points the same way. This is an expectation, not a result: no second model size has been run, so we cannot say how much it would help or what it would cost in speed and power.
+3. **Fewer wrong confident commands.** After the guard, 11 of 212 train rows still produce a wrong command that would reach the gate. The gate catches many of them, but not all. Candidates: a stricter grounding check on distance and bearing, and more clarify examples.
+4. **Real noise for voice.** The noisy clips are synthetic. Record real noisy clips and re-score.
+5. **Voice to motion timing**, at least 20 runs, once the real flight backend is connected.
+6. **Operator feedback.** Show the demo to operators and let their answers change the rules table. The rules and message wording have not been tested with any real operator.
 
 ## Later: the parts the sponsor sheet asks for that we did not build
 
