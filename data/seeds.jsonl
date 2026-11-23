@@ -12,7 +12,7 @@
 {"id": "S12", "text": "Sweep 37.4102 -121.9968 with a 250 meter radius at 70 meters, looking for structures.", "expected": {"action": "search_area", "params": {"lat": 37.4102, "lon": -121.9968, "radius_m": 250, "alt_m": 70, "target": "structure"}}}
 {"id": "S13", "text": "Search the north field for vehicles, radius 120, altitude 45.", "expected": {"action": "search_area", "params": {"place": "north_field", "radius_m": 120, "alt_m": 45, "target": "vehicle"}}}
 {"id": "S14", "text": "Find vehicles near 37.4117 -122.0031, 300 meter radius, 80 meters up.", "expected": {"action": "search_area", "params": {"lat": 37.4117, "lon": -122.0031, "radius_m": 300, "alt_m": 80, "target": "vehicle"}}}
-{"id": "S15", "text": "Look around the east ridge for anything, radius 75 m, altitude 30 m.", "expected": {"action": "search_area", "params": {"place": "east_ridge", "radius_m": 75, "alt_m": 30, "target": "any"}}}
+{"id": "S15", "text": "Look around the north field for anything, radius 75 m, altitude 30 m.", "expected": {"action": "search_area", "params": {"place": "north_field", "radius_m": 75, "alt_m": 30, "target": "any"}}}
 {"id": "S16", "text": "Check for vehicles around 37.4132 -121.9946 within 180 meters, fly at 55.", "expected": {"action": "search_area", "params": {"lat": 37.4132, "lon": -121.9946, "radius_m": 180, "alt_m": 55, "target": "vehicle"}}}
 {"id": "S17", "text": "Loiter at 37.4127, -121.9973 for 2 minutes, radius 30 meters.", "expected": {"action": "loiter", "params": {"lat": 37.4127, "lon": -121.9973, "radius_m": 30, "duration_s": 120}}}
 {"id": "S18", "text": "Circle 37.4152 -121.9931 with a 50 m radius for 60 seconds.", "expected": {"action": "loiter", "params": {"lat": 37.4152, "lon": -121.9931, "radius_m": 50, "duration_s": 60}}}
@@ -20,7 +20,7 @@
 {"id": "S20", "text": "Loiter over 37.4172 -121.9883 for 90 seconds, 40 meter radius.", "expected": {"action": "loiter", "params": {"lat": 37.4172, "lon": -121.9883, "radius_m": 40, "duration_s": 90}}}
 {"id": "S21", "text": "Circle event E03 for 45 seconds, radius 20.", "expected": {"action": "loiter", "params": {"event_id": "E03", "radius_m": 20, "duration_s": 45}}}
 {"id": "S22", "text": "Stay around 37.4120 -121.9959 for 10 minutes with a 60 meter radius.", "expected": {"action": "loiter", "params": {"lat": 37.412, "lon": -121.9959, "radius_m": 60, "duration_s": 600}}}
-{"id": "S23", "text": "Loiter at the south bridge for 3 minutes, 35 m radius.", "expected": {"action": "loiter", "params": {"place": "south_bridge", "radius_m": 35, "duration_s": 180}}}
+{"id": "S23", "text": "Loiter at the bridge for 3 minutes, 35 m radius.", "expected": {"action": "loiter", "params": {"place": "bridge", "radius_m": 35, "duration_s": 180}}}
 {"id": "S24", "text": "Hold position.", "expected": {"action": "hold", "params": {}}}
 {"id": "S25", "text": "Stop and hover where you are.", "expected": {"action": "hold", "params": {}}}
 {"id": "S26", "text": "Hold.", "expected": {"action": "hold", "params": {}}}
