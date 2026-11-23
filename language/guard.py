@@ -2,7 +2,8 @@
 
 1. normalize_units(text): runs BEFORE the model. Turns number words into digits and feet,
    kilometers and minutes into meters and seconds, so the model does no arithmetic.
-2. check_grounding(cmd, text): runs AFTER the model. If a value in the command (altitude,
+2. check_grounding(cmd, text): runs AFTER the model. If climb or descend points the opposite way
+   from the direction words in the text, or if a value in the command (altitude,
    bearing, coordinates, a place or event name, ...) is not in the operator's words, the command
    becomes a clarify. This stops the model inventing values such as alt_m 1 or lat/lon 0, 0.
 
@@ -37,6 +38,20 @@ _SLOTS = [
     ("duration_s", ("duration_s",), "ambiguous_reference", "For how many seconds?"),
     ("amount_m", ("amount_m",), "missing_altitude", "By how many meters?"),
 ]
+
+
+_DOWN = re.compile(r"\b(?:down|drop|lower|lose|descend|descent|sink|decrease)\b", re.I)
+_UP = re.compile(r"\b(?:up|climb|ascend|ascent|rise|gain|raise|higher|increase)\b", re.I)
+
+
+def _direction_conflict(action, text):
+    """True when the words say the opposite way from the command (climb vs descend).
+
+    The model sometimes swaps them. Both are valid and inside the limits, so the safety gate
+    cannot tell. Only a one-sided text counts: if the text has both kinds of words, we leave it.
+    """
+    down, up = bool(_DOWN.search(text)), bool(_UP.search(text))
+    return (action == "climb" and down and not up) or (action == "descend" and up and not down)
 
 
 def _words_to_int(run):
@@ -99,6 +114,10 @@ def check_grounding(cmd, text, context_event_ids=()):
     if not isinstance(cmd, dict) or cmd.get("action") == "clarify":
         return cmd, None
     params = cmd.get("params") or {}
+    if _direction_conflict(cmd.get("action"), text):
+        clarify = {"action": "clarify", "params": {"reason": "ambiguous_reference",
+                                                   "question": "Do you want me to climb or descend?"}}
+        return clarify, f"{cmd['action']} does not match the direction words in the request"
     nums = numbers_in(text)
     for name, keys, reason, question in _SLOTS:
         for key in keys:

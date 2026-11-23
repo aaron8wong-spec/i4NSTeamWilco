@@ -42,7 +42,21 @@ Examples:
 Request: Land the plane at the airport.
 {"action":"clarify","params":{"reason":"unsupported_action","question":"I can only fly the commands I know. Do you want me to return home?"}}
 Request: Stay in the air.
-{"action":"hold","params":{}}"""
+{"action":"hold","params":{}}
+Request: Look for people around the bridge, radius 80 meters, at 30 meters.
+{"action":"search_area","params":{"place":"bridge","radius_m":80,"alt_m":30,"target":"person"}}
+Request: Fly to the buildings at 45 meters.
+{"action":"goto","params":{"place":"buildings","alt_m":45}}
+Request: Search the north field for vehicles, radius 200 meters at 60 meters.
+{"action":"search_area","params":{"place":"north_field","radius_m":200,"alt_m":60,"target":"vehicle"}}
+Request: Head to the usual spot at 30 meters.
+{"action":"clarify","params":{"reason":"ambiguous_reference","question":"Which place do you mean?"}}
+Request: Take it down to ground level right beside the crowd.
+{"action":"clarify","params":{"reason":"unsafe_request","question":"That is unsafe. What altitude do you want?"}}
+Request: Send a message to the team that we found it.
+{"action":"clarify","params":{"reason":"unsupported_action","question":"I can't send messages. Do you want me to return home?"}}
+Only use a place name the operator actually says as a place. If the place is vague or not a place, use clarify.
+Copy numbers exactly as the operator says them. When the operator names a place, output place and never lat and lon."""
 
 # Llama 3.1 chat format. The server adds the BOS token itself.
 TEMPLATE = (

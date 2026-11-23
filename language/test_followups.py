@@ -58,8 +58,8 @@ def test_no_pending_rows_have_no_pending_question():
 
 
 def test_prompt_without_state_is_byte_identical_to_before():
-    # sha256 of the prompt built by the pre-7.4 code (git HEAD 65c03cb), for two sample texts
-    want = {"Hold position.": "3a2691b322bcf83aa360a01f1dd8b742564eb7ec01109a510ec14971a4edccd1", "Yes.": "4700d17b37f6392c7878e24d9ff22a8303997015f32a5e2017e660da828aacd0"}
+    # sha256 of the no-state prompt after the 2026-11-22 few-shot place examples (was the pre-7.4 hash). Update on any deliberate SYSTEM change.
+    want = {"Hold position.": "26e01f3f4b049ef11919ce8bc44c69e733bda5912be3645576a6bb7e6bbc641b", "Yes.": "1955b02cfe9475203f97f17b61f219ad61e71bb4f16a8c3a895a580ae95aa633"}
     for t, h in want.items():
         assert run_llm.build_prompt(t) == run_llm.TEMPLATE.format(system=run_llm.SYSTEM, text=t)
         assert run_llm.build_prompt(t, None) == run_llm.build_prompt(t)
