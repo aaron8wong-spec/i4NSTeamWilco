@@ -6,12 +6,16 @@
 
 Script/stdin lines are operator text. Lines starting with "/" are directives:
   /manual, /ai   set the mode      @wait   wait until the drone finishes the current command
+  @voice FILE.wav   transcribe a recording and run the text like a typed line (task M12)
+With --voice the loop records from the microphone (Enter to talk, Enter to stop, q to quit).
 A "yes"/"no" line in a script waits until the scorer has asked a question.
 Perception is simulated: events are scripted (fake_events.py), not detected.
 """
 import argparse
 import asyncio
+import re
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -23,6 +27,12 @@ from integration.fake_events import FakeEvents  # noqa: E402
 from integration.mission_state import MissionState  # noqa: E402
 from integration.mock_flight import MockFlight  # noqa: E402
 from reporting import scorer  # noqa: E402
+
+
+def is_garbled(text):
+    """True when a transcript cannot be a command: empty, or no word of two or more letters.
+    Anything else goes on to the model and the guard, which may still answer with a clarify."""
+    return not any(len(w) >= 2 for w in re.findall(r"[A-Za-z]+", text))
 
 
 class FlightSlot:
@@ -50,9 +60,10 @@ class FlightSlot:
 
 
 async def run(lines, llm=None, llm_url="http://127.0.0.1:8080", backend=None, events=None, out=print,
-              time_scale=0.0, dry_run=False, log=None, script=True):
+              time_scale=0.0, dry_run=False, log=None, script=True, transcribe_fn=None):
     """Run the loop. `lines` is a list (script) or an async callable returning the next line or None.
-    Returns the list of printed lines (deterministic for a given script, fake llm and time_scale 0)."""
+    Returns the list of printed lines (deterministic for a given script, fake llm and time_scale 0).
+    transcribe_fn: wav path -> text, used by "@voice FILE.wav" lines (default: voice/transcribe.py)."""
     printed = []
 
     def say(s):
@@ -94,8 +105,9 @@ async def run(lines, llm=None, llm_url="http://127.0.0.1:8080", backend=None, ev
             finally:
                 queue.task_done()
 
-    async def operator_line(text):
-        say(f"> {text}")
+    async def operator_line(text, echo=True):
+        if echo:
+            say(f"> {text}")
         r = await pipeline.handle_text(text, state, slot, llm_url, dry_run=dry_run, llm=llm,
                                        known_event_positions=events.positions, log=log)
         cmd, (ok, reason) = r["command"], r["gate"]
@@ -113,6 +125,36 @@ async def run(lines, llm=None, llm_url="http://127.0.0.1:8080", backend=None, ev
                 say("[STATUS] nothing new since the last report")
         else:
             say(f"[CMD] {cmd['action']} {cmd['params']}" + ("" if r["result"] is None else f" -> {r['result']['detail']}"))
+
+    transcribe_lock = asyncio.Lock()
+
+    async def voice_line(wav):
+        """Same path as a typed line: transcribe, show the transcript, then operator_line()."""
+        nonlocal transcribe_fn
+        if transcribe_fn is None:
+            sys.path.insert(0, str(ROOT / "voice"))
+            from transcribe import transcribe as transcribe_fn  # noqa: E402
+        speech_end = time.time()
+        try:
+            async with transcribe_lock:  # transcripts come out in the order the lines were given
+                text = await asyncio.to_thread(transcribe_fn, wav)
+        except Exception as e:  # missing binary, bad file, timeout: say so, do not crash the loop
+            log.write("voice", {"wav": str(wav), "error": str(e), "ignored": True})
+            say(f"[HEARD] (could not transcribe: {e})")
+            return
+        text = text.strip()
+        log.write("voice", {"wav": str(wav), "transcript": text, "speech_end_ts": round(speech_end, 3),
+                            "transcribe_s": round(time.time() - speech_end, 3),
+                            "ignored": is_garbled(text)})
+        if is_garbled(text):
+            say("[HEARD] (nothing understood, ignored)")
+            return
+        say(f"[HEARD] {text}")
+        if script and pipeline.parse_reply(text):
+            me = asyncio.current_task()  # this task is in `tasks` too; do not wait for ourselves
+            while state.as_dict()["pending_question"] is None and any(not t.done() and t is not me for t in tasks):
+                await asyncio.sleep(0)
+        await operator_line(text, echo=False)
 
     worker = asyncio.ensure_future(event_worker())
     tasks = []
@@ -136,6 +178,9 @@ async def run(lines, llm=None, llm_url="http://127.0.0.1:8080", backend=None, ev
             continue
         if line == "@wait":
             await wait_tasks()
+        elif line.startswith("@voice "):
+            tasks.append(asyncio.ensure_future(voice_line(line[len("@voice "):].strip())))
+            await asyncio.sleep(0)
         elif line in ("/manual", "/ai"):
             state.set_mode(line[1:])
             say(f"[MODE] {line[1:]}")
@@ -161,12 +206,39 @@ def main(argv=None):
     ap.add_argument("--time-scale", type=float, default=1.0, help="1.0 real time, 0 no waiting")
     ap.add_argument("--dry-run", action="store_true", help="gate only, nothing flies")
     ap.add_argument("--log", help="run log path (default: runs/run-<time>.jsonl)")
+    ap.add_argument("--voice", action="store_true", help="push-to-talk from the microphone instead of typing")
     a = ap.parse_args(argv)
     log = pipeline.RunLog(a.log) if a.log else pipeline.RunLog()
     print(f"[LOG] {log.path}")
     if a.script:
         lines, script = Path(a.script).read_text().splitlines(), True
 
+    elif a.voice:
+        sys.path.insert(0, str(ROOT / "voice"))
+        import tempfile
+        from record import record_push_to_talk
+        tmp = Path(tempfile.mkdtemp(prefix="wilco-voice-"))
+        count = [0]
+
+        def record_one():
+            ans = input("Enter = talk, q = quit: ").strip().lower()
+            if ans == "q":
+                return None
+            count[0] += 1
+            wav = tmp / f"say{count[0]:03d}.wav"
+            started = [False]
+
+            def input_fn(prompt):  # the first Enter was already pressed above
+                if not started[0]:
+                    started[0] = True
+                    return ""
+                return input(prompt)
+            record_push_to_talk(wav, input_fn=input_fn)
+            return f"@voice {wav}"
+
+        async def lines():
+            return await asyncio.get_running_loop().run_in_executor(None, record_one)
+        script = False
     else:
 
         async def lines():

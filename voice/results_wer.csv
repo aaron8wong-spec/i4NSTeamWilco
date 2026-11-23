@@ -1,0 +1,31 @@
+id,file,condition,noise_source,reference,transcript,ref_words,errors_strict,errors_numnorm,transcribe_s
+v01,v01_quiet.wav,quiet,none (quiet room),"Search the north field for vehicles, radius one hundred fifty meters at fifty meters.","Search the north field for vehicles, radius 150 meters at 50 meters.",14,4,0,0.6
+v02,v02_quiet.wav,quiet,none (quiet room),"Yes, loiter.","Yes, loiter.",2,0,0,0.37
+v03,v03_quiet.wav,quiet,none (quiet room),Return home.,return home,2,0,0,0.36
+v04,v04_quiet.wav,quiet,none (quiet room),Hold position.,Hold position.,2,0,0,0.44
+v05,v05_quiet.wav,quiet,none (quiet room),Report status.,Report status.,2,0,0,0.39
+v06,v06_quiet.wav,quiet,none (quiet room),Fly to the bridge at forty meters.,Fly to Bridge at 40 meters.,7,2,1,0.46
+v07,v07_quiet.wav,quiet,none (quiet room),Climb twenty meters.,Climb 20 meters.,3,1,0,0.39
+v08,v08_quiet.wav,quiet,none (quiet room),Descend thirty meters.,descend 30 meters,3,1,0,0.36
+v09,v09_quiet.wav,quiet,none (quiet room),Go to the buildings at sixty meters.,Go to the buildings at 60 meters.,7,1,0,0.36
+v10,v10_quiet.wav,quiet,none (quiet room),Move five hundred meters on bearing forty five at forty meters.,Move 500 meters on bearing 45 at 40 meters.,11,5,0,0.4
+v11,v11_quiet.wav,quiet,none (quiet room),"Search the bridge for people, radius eighty meters at thirty meters.",Search the bridge for people. Radius 80 meters at 30 meters.,11,2,0,0.39
+v12,v12_quiet.wav,quiet,none (quiet room),"Loiter at event E03 for two minutes, radius thirty meters.","Loiter at event E03 for two minutes, radius 30 meters.",10,1,0,0.46
+v13,v13_quiet.wav,quiet,none (quiet room),"No, keep searching.","No, keep searching.",3,0,0,0.67
+v14,v14_quiet.wav,quiet,none (quiet room),Come down one hundred twenty feet.,Calm down 120 feet.,6,4,1,0.58
+v15,v15_quiet.wav,quiet,none (quiet room),"Go to latitude thirty seven point four one four zero, longitude minus one two one point nine nine six zero, at forty meters.","Go to latitude 37.4140, longitude minus 121.9960 at 40 meters.",23,16,14,0.72
+v16,v16_quiet.wav,quiet,none (quiet room),Fly northeast for five hundred meters.,Fly northeast for 500 meters.,6,2,0,0.55
+v17,v17_quiet.wav,quiet,none (quiet room),Go higher.,Go higher.,2,0,0,0.51
+v18,v18_quiet.wav,quiet,none (quiet room),Land the plane at the airport.,land the plane at the airport.,6,0,0,1.4
+v19,v19_quiet.wav,quiet,none (quiet room),Fly low over the people near the bridge.,Fly low over the people near the bridge.,8,0,0,2.11
+v20,v20_quiet.wav,quiet,none (quiet room),Take me over there.,Take me over there.,4,0,0,1.64
+v01,v01_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234","Search the north field for vehicles, radius one hundred fifty meters at fifty meters.","Search the north field for vehicles, radius 150 meters at 50 meters.",14,4,0,1.56
+v02,v02_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234","Yes, loiter.","Yes, moderator.",2,1,1,1.01
+v03,v03_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234",Return home.,return home.,2,0,0,1.04
+v05,v05_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234",Report status.,report status.,2,0,0,1.17
+v06,v06_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234",Fly to the bridge at forty meters.,lighter bridge at 40 meters.,7,4,3,1.18
+v07,v07_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234",Climb twenty meters.,climb 20 meters,3,1,0,0.89
+v10,v10_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234",Move five hundred meters on bearing forty five at forty meters.,Move 500 meters on bearing 45 at 40 meters.,11,5,0,1.89
+v12,v12_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234","Loiter at event E03 for two minutes, radius thirty meters.","Water at event is E03 for 2 minutes, radius 30 meters.",10,4,2,1.71
+v13,v13_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234","No, keep searching.","No, keep searching.",3,0,0,0.67
+v14,v14_noisy.wav,noisy,"synthetic pink noise mixed in by voice/make_noisy.py, SNR 5 dB, seed 1234",Come down one hundred twenty feet.,Come down 120 feet.,6,3,0,0.67
