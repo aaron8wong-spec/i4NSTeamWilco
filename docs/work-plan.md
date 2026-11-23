@@ -32,9 +32,9 @@ If nobody objects, the default applies and the agents proceed.
 | # | Decision | Default |
 |---|---|---|
 | D1 | Rules that use "at most 2 people" or `confidence` in the condition | Drop those parts. `min_confidence` already covers confidence. Lane M lists every rule that loses meaning in `docs/rules-migration.md`. |
-| D2 | Multi-step commands | Approve: add `{"steps": [command, ...]}` as schema v1.3.0 (max 5 steps, each step one existing command). Lane M edits `schemas.json`, rebuilds the grammar and adds data. Lane S builds the executor. |
+| D2 | Multi-step commands | **DECIDED 2026-11-23: NO.** Schema stays v1.2.0. M9 and S7 are dropped. (Original default, not used: approve: add `{"steps": [command, ...]}` as schema v1.3.0 (max 5 steps, each step one existing command). Lane M edits `schemas.json`, rebuilds the grammar and adds data. Lane S builds the executor.) |
 | D3 | Safety limits | Battery floor 25%, max altitude 120 m, min altitude 1 m, geofence 1500 m, lost-link hold 10 s. Write them in `integration/config.json`. |
-| D4 | Place names | Keep the three verified places (`north_field`, `buildings`, `bridge`). Lane S verifies 5 more open-ground points. Lane M then renames the dataset's place names to the real ones with a script. |
+| D4 | Place names | **DECIDED 2026-11-23: only the three verified places** (`north_field`, `buildings`, `bridge`). No new places. S6 is reduced to confirming those three by eye. Dataset placeholders were remapped onto them. (Original default, not used: keep the three verified places (`north_field`, `buildings`, `bridge`). Lane S verifies 5 more open-ground points. Lane M then renames the dataset's place names to the real ones with a script.) |
 
 ## 4. Lane M tasks (Mac, model)
 
