@@ -1,0 +1,45 @@
+{
+  "split": "followups_train",
+  "time": "20261123-015800",
+  "model_summary": {
+    "n": 34,
+    "action_acc": 0.7647058823529411,
+    "param_acc": 1.0,
+    "exact_acc": 0.7647058823529411,
+    "clarify_recall": 0.7272727272727273,
+    "clarify_reason_acc": 1.0,
+    "false_ask_rate": 0.08695652173913043,
+    "would_fly_wrong": 6,
+    "climb_descend_swaps": 1,
+    "outcomes": {
+      "wrong_action": 3,
+      "exact": 26,
+      "false_ask": 2,
+      "invented_command": 3
+    }
+  },
+  "guarded_summary": {
+    "n": 34,
+    "action_acc": 0.8235294117647058,
+    "param_acc": 1.0,
+    "exact_acc": 0.7647058823529411,
+    "clarify_recall": 0.9090909090909091,
+    "clarify_reason_acc": 0.8,
+    "false_ask_rate": 0.13043478260869565,
+    "would_fly_wrong": 3,
+    "climb_descend_swaps": 0,
+    "outcomes": {
+      "wrong_action": 2,
+      "exact": 26,
+      "false_ask": 3,
+      "wrong_reason": 2,
+      "invented_command": 1
+    }
+  },
+  "latency": {
+    "median": 2.556060166998577,
+    "p90": 3.905049582999709,
+    "max": 5.433980583000448
+  },
+  "normalize_input": true
+}
