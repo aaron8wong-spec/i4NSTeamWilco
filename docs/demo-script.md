@@ -14,7 +14,7 @@ Event positions and times come from `integration/fake_events.py` (mock) and the 
 
 | Step | Operator says | System does and shows |
 |---|---|---|
-| 1 | "Search the north field for vehicles." | Command: `search_area`, place `north_field`, target `vehicle` (radius and altitude must be given or the model asks; if not given, expect a clarify, see note below). Gate passes. Drone takes off and flies the search pattern. mission_state target becomes `vehicle`. |
+| 1 | "Search the north field for vehicles, radius 150 meters at 50 meters." | Command: `search_area`, place `north_field`, target `vehicle`, radius_m 150, alt_m 50. Gate passes. Drone takes off and flies the search pattern. mission_state target becomes `vehicle`. |
 | 2 | (nothing) | E01, deer (wildlife, 0.90): scorer tier log. No message to the operator. |
 | 3 | (nothing) | E02, truck, no people (vehicle, 0.85): tier summarize. Held until the operator asks. |
 | 4 | (nothing) | E03, truck with 2 people (0.82): tier interrupt. Alert says why, for example "Vehicle with people visible (rule R01: vehicle with people is high priority)." |
@@ -23,7 +23,7 @@ Event positions and times come from `integration/fake_events.py` (mock) and the 
 | 7 | "Report status." | Command: `report_status`. System reads out the summarize list (E02, the truck). |
 | 8 | "Return home." | Command: `return_home`. Drone returns. |
 
-Note on step 1: CLAUDE.md section 3 shows the operator line without a radius or altitude. If the model asks "How high should I fly?" that is correct clarify behavior. For a clean recording either answer the question ("Fifty meters") or use "Search the north field for vehicles at 50 meters." Decide before recording and keep it fixed.
+Note on step 1 (decided 2026-11-22): CLAUDE.md section 3 shows the operator line without a radius or altitude. The rules say do not guess a value, and the grounding guard turns an invented radius or altitude into a clarify, so the bare line correctly asks a question. The demo uses the full line above (same as `integration/demo_script.txt`) and keeps it fixed. The bare line is shown separately as a clarify example: the system asks "How high should I fly?" and the operator answers. Section 3 of CLAUDE.md should say the same.
 
 Note on steps 4 and 5: CLAUDE.md section 3 describes the ask-first alert as the "truck with two people" ("Vehicle with two people at the east edge. Loiter?"). The rules table now interrupts for that event and asks for the low-confidence one. Show what the current scorer does, and fix whichever document is wrong.
 

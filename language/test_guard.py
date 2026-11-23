@@ -76,3 +76,41 @@ def test_guard_never_blocks_a_correct_seed_command(seed):
     """The seed's own correct command must pass its own normalized text. A false clarify would be a regression."""
     out, why = check_grounding(seed["expected"], normalize_units(seed["text"]))
     assert out == seed["expected"], why
+
+
+@pytest.mark.parametrize("text,action", [
+    ("Go down 25 meters.", "climb"), ("Drop 40 meters.", "climb"), ("Lose 35 meters of altitude.", "climb"),
+    ("Come down 120 feet.", "climb"), ("Lower yourself by 10 meters.", "climb"),
+    ("Go up 30 meters.", "descend"), ("Rise fifty meters.", "descend"), ("Gain 150 feet.", "descend"),
+])
+def test_climb_descend_swap_becomes_clarify(text, action):
+    n = normalize_units(text)
+    amount = int(next(x for x in numbers_in_text(n)))
+    cmd, why = check_grounding({"action": action, "params": {"amount_m": amount}}, n)
+    assert cmd["action"] == "clarify" and cmd["params"]["reason"] == "ambiguous_reference"
+    assert "direction" in why
+
+
+@pytest.mark.parametrize("text,action", [
+    ("Go down 25 meters.", "descend"), ("Climb 55 meters.", "climb"), ("Go up 30 meters.", "climb"),
+    ("Climb 20 meters, do not come down.", "climb"),  # both kinds of words: left alone
+])
+def test_right_direction_is_unchanged(text, action):
+    n = normalize_units(text)
+    amount = int(next(x for x in numbers_in_text(n)))
+    cmd = {"action": action, "params": {"amount_m": amount}}
+    assert check_grounding(cmd, n) == (cmd, None)
+
+
+def numbers_in_text(t):
+    from guard import numbers_in
+    return numbers_in(t)
+
+
+def test_direction_check_never_flags_a_labeled_train_row():
+    rows = [json.loads(l) for l in (Path(__file__).parent.parent / "data" / "train.jsonl").read_text().splitlines()]
+    for r in rows:
+        if r["expected"]["action"] in ("climb", "descend"):
+            n = normalize_units(r["text"])
+            cmd, why = check_grounding(r["expected"], n)
+            assert why is None, (r["id"], r["text"], why)
